@@ -8,8 +8,10 @@ defmodule AoC.MixProject do
       app: :advent_of_code,
       version: "2019.0.1",
       elixir: "~> 1.9",
+      elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
       preferred_cli_env: [espec: :test],
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -17,6 +19,12 @@ defmodule AoC.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp aliases do
+    [
+      test: ["espec"]
     ]
   end
 
