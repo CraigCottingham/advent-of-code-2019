@@ -24,14 +24,14 @@ defmodule AoC.MixProject do
 
   defp aliases do
     [
-      test: ["format", "credo --strict", "espec"]
+      test: ["format", "credo --strict", "dialyzer", "espec"]
     ]
   end
 
   defp deps do
     [
       {:credo, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.7", only: :test},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
