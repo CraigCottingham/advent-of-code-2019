@@ -9,6 +9,7 @@ defmodule AoC.MixProject do
       version: "2019.0.1",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
+      preferred_cli_env: [espec: :test],
       deps: deps()
     ]
   end
