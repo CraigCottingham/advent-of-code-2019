@@ -24,7 +24,7 @@ defmodule AoC.MixProject do
 
   defp aliases do
     [
-      test: ["espec"]
+      test: ["format", "credo --strict", "espec"]
     ]
   end
 
