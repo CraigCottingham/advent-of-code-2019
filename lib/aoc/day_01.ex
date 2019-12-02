@@ -9,16 +9,20 @@ defmodule AoC.Day01 do
     |> Enum.reduce(0, &(&1 + &2))
   end
 
-  # def part_2 do
-  #   File.stream!("data/day01-input.txt")
-  #   |> Enum.map(&String.trim/1)
-  #   |> Enum.map(&String.to_integer/1)
-  #   |> Enum.reduce([], fn delta, acc -> [acc, delta] end)
-  #   |> List.flatten
-  #   |> Stream.cycle
-  #   |> Enum.reduce_while({0, MapSet.new([0])}, &calc_new_frequency/2)
-  #   |> elem(0)
-  # end
+  def part_2 do
+    File.stream!("data/day01-input.txt")
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&String.to_integer/1)
+    |> Enum.map(&calculate_all_fuel/1)
+    |> Enum.reduce(0, &(&1 + &2))
+  end
 
   def calculate_fuel(mass), do: Integer.floor_div(mass, 3) - 2
+
+  def calculate_all_fuel(mass) do
+    case calculate_fuel(mass) do
+      fuel_mass when fuel_mass > 0 -> fuel_mass + calculate_all_fuel(fuel_mass)
+      _ -> 0
+    end
+  end
 end
