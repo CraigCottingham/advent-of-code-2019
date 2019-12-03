@@ -102,4 +102,21 @@ defmodule AoC.Day03 do
 
     path_to_segments(tail, next_point, [{last_point, next_point} | segments])
   end
+
+  def path_length_to_point(path, point, length_so_far \\ 0)
+
+  def path_length_to_point([], _, length_so_far), do: length_so_far
+
+  def path_length_to_point([{{px, py}, {qx, qy}} | tail], {rx, ry} = point, length_so_far) do
+    cond do
+      py == qy && py == ry && Enum.member?(px..qx, rx) ->
+        length_so_far + abs(rx - px)
+
+      px == qx && px == rx && Enum.member?(py..qy, ry) ->
+        length_so_far + abs(ry - py)
+
+      true ->
+        path_length_to_point(tail, point, length_so_far + abs(qx - px) + abs(qy - py))
+    end
+  end
 end
