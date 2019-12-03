@@ -23,13 +23,17 @@ defmodule AoC.Day03 do
   #   |> Enum.at(0)
   # end
 
-  def closest_intersection([path1, path2]) do
+  defp all_intersections([path1, path2]) do
     for s1 <- path_to_segments(path1, {0, 0}, []), s2 <- path_to_segments(path2, {0, 0}, []) do
       {s1, s2, intersect?(s1, s2)}
     end
     |> Enum.filter(fn {_, _, intersect} -> intersect end)
     |> Enum.map(fn {s1, s2, _} -> AoC.Day03.intersection(s1, s2) end)
     |> Enum.reject(fn p -> p == {0, 0} end)
+  end
+
+  def closest_intersection([path1, path2]) do
+    all_intersections([path1, path2])
     |> Enum.min_by(fn p -> AoC.Day03.manhattan_distance({0, 0}, p) end)
   end
 
