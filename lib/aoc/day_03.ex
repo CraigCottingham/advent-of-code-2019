@@ -82,7 +82,7 @@ defmodule AoC.Day03 do
 
   def path_to_segments(path, last_point, segments \\ [])
 
-  def path_to_segments([], _, segments), do: segments
+  def path_to_segments([], _, segments), do: Enum.reverse(segments)
 
   def path_to_segments([vector | tail], {last_x, last_y} = last_point, segments) do
     next_point =
