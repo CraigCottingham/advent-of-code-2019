@@ -5,26 +5,19 @@ defmodule AoC.Day03 do
 
   def part_1 do
     "data/day03-input.txt"
-    |> File.stream!()
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(fn line ->
-      line
-      |> String.split(",")
-      |> Enum.map(&String.trim/1)
-    end)
+    |> load_paths_from_file()
     |> closest_intersection()
     |> manhattan_distance({0, 0})
   end
 
-  # def part_2 do
-  #   "data/day03-input.txt"
-  #   |> load_program()
-  #   |> run_intcode_program({12, 2})
-  #   |> Enum.at(0)
-  # end
+  def part_2 do
+    "data/day03-input.txt"
+    |> load_paths_from_file()
+    |> shortest_path()
+  end
 
   defp all_intersections([path1, path2]) do
-    for s1 <- path_to_segments(path1, {0, 0}, []), s2 <- path_to_segments(path2, {0, 0}, []) do
+    for s1 <- path_to_segments(path1), s2 <- path_to_segments(path2) do
       {s1, s2, intersect?(s1, s2)}
     end
     |> Enum.filter(fn {_, _, intersect} -> intersect end)
@@ -70,6 +63,34 @@ defmodule AoC.Day03 do
       when p2x == q2x and p1y == q1y,
       do: {p2x, p1y}
 
+  def length_to_point(path, point, length_so_far \\ 0)
+
+  def length_to_point([], _, length_so_far), do: length_so_far
+
+  def length_to_point([{{px, py} = p, {qx, qy} = q} | tail], {rx, ry} = r, length_so_far) do
+    cond do
+      py == qy && py == ry && Enum.member?(px..qx, rx) ->
+        length_so_far + manhattan_distance(p, r)
+
+      px == qx && px == rx && Enum.member?(py..qy, ry) ->
+        length_so_far + manhattan_distance(p, r)
+
+      true ->
+        length_to_point(tail, r, length_so_far + manhattan_distance(p, q))
+    end
+  end
+
+  defp load_paths_from_file(filename) do
+    filename
+    |> File.stream!()
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(fn line ->
+      line
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+    end)
+  end
+
   def manhattan_distance({px, py}, {qx, qy}), do: abs(qx - px) + abs(qy - py)
 
   def orientation({px, py}, {qx, qy}, {rx, ry}) do
@@ -80,43 +101,37 @@ defmodule AoC.Day03 do
     end
   end
 
-  def path_to_segments(path, last_point, segments \\ [])
+  def path_to_segments(path, previous_point \\ {0, 0}, segments \\ [])
 
   def path_to_segments([], _, segments), do: Enum.reverse(segments)
 
-  def path_to_segments([vector | tail], {last_x, last_y} = last_point, segments) do
+  def path_to_segments([vector | tail], {previous_x, previous_y} = previous_point, segments) do
     next_point =
       case Regex.named_captures(~r/(?<direction>[DLRU])(?<distance>\d+)/, vector) do
         %{"direction" => "D", "distance" => distance} ->
-          {last_x, last_y - String.to_integer(distance)}
+          {previous_x, previous_y - String.to_integer(distance)}
 
         %{"direction" => "L", "distance" => distance} ->
-          {last_x - String.to_integer(distance), last_y}
+          {previous_x - String.to_integer(distance), previous_y}
 
         %{"direction" => "R", "distance" => distance} ->
-          {last_x + String.to_integer(distance), last_y}
+          {previous_x + String.to_integer(distance), previous_y}
 
         %{"direction" => "U", "distance" => distance} ->
-          {last_x, last_y + String.to_integer(distance)}
+          {previous_x, previous_y + String.to_integer(distance)}
       end
 
-    path_to_segments(tail, next_point, [{last_point, next_point} | segments])
+    path_to_segments(tail, next_point, [{previous_point, next_point} | segments])
   end
 
-  def path_length_to_point(path, point, length_so_far \\ 0)
+  def shortest_path([path1, path2]) do
+    segment_list_1 = path_to_segments(path1)
+    segment_list_2 = path_to_segments(path2)
 
-  def path_length_to_point([], _, length_so_far), do: length_so_far
-
-  def path_length_to_point([{{px, py}, {qx, qy}} | tail], {rx, ry} = point, length_so_far) do
-    cond do
-      py == qy && py == ry && Enum.member?(px..qx, rx) ->
-        length_so_far + abs(rx - px)
-
-      px == qx && px == rx && Enum.member?(py..qy, ry) ->
-        length_so_far + abs(ry - py)
-
-      true ->
-        path_length_to_point(tail, point, length_so_far + abs(qx - px) + abs(qy - py))
-    end
+    all_intersections([path1, path2])
+    |> Enum.map(fn point ->
+      length_to_point(segment_list_1, point) + length_to_point(segment_list_2, point)
+    end)
+    |> Enum.min()
   end
 end
