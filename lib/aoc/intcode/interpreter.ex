@@ -47,7 +47,15 @@ defmodule AoC.Intcode.Interpreter do
         value_2 = Memory.read(memory, source_2)
         result = value_1 * value_2
 
-        step(%{state | memory: List.replace_at(memory, dest, result), ip: ip + 4})
+        step(%{state | memory: Memory.write(memory, dest, result), ip: ip + 4})
+
+      # input
+      3 ->
+        dest = Memory.read(memory, ip + 1)
+
+        value = state.input_fn.()
+
+        step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
 
       # exit
       99 ->

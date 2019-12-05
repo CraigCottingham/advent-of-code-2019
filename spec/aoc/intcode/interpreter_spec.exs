@@ -36,6 +36,12 @@ defmodule AoC.Intcode.Interpreter.Spec do
       end
 
       it "tests opcode 3 (input)" do
+        Interpreter.initialize()
+        |> Interpreter.set_memory([3, 3, 99, 0])
+        |> Interpreter.set_input(fn -> 1 end)
+        |> Interpreter.run()
+        |> expect()
+        |> to(eq([3, 3, 99, 1]))
       end
 
       it "tests opcode 4 (output)" do
