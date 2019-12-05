@@ -1,13 +1,13 @@
 defmodule AoC.Intcode.Interpreter do
   @moduledoc false
 
-  alias AoC.Intcode.Memory
+  # alias AoC.Intcode.Memory
 
-  def run(program, {noun, verb} \\ {nil, nil}) do
-    mem =
-      program
-      |> Memory.set_noun(noun)
-      |> Memory.set_verb(verb)
+  def run(mem) do
+    # mem =
+    #   program
+    #   |> Memory.set_noun(noun)
+    #   |> Memory.set_verb(verb)
 
     case step({:cont, mem, 0}) do
       {:halt, mem} ->

@@ -18,7 +18,7 @@ defmodule AoC.Day02.Spec do
     end
 
     it "tests run_intcode_program/2 with varying input" do
-      program = Memory.load_file("data/day02-input.txt")
+      memory = Memory.load_file("data/day02-input.txt")
 
       [
         {0, 0},
@@ -30,8 +30,10 @@ defmodule AoC.Day02.Spec do
       ]
       |> Enum.each(fn {noun, verb} ->
         output =
-          program
-          |> Interpreter.run({noun, verb})
+          memory
+          |> Memory.set_noun(noun)
+          |> Memory.set_verb(verb)
+          |> Interpreter.run()
           |> Enum.at(0)
 
         expect(output) |> to(eq(noun * 576_000 + verb + 682_644))

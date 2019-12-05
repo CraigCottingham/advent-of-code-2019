@@ -6,18 +6,22 @@ defmodule AoC.Day02 do
   def part_1 do
     "data/day02-input.txt"
     |> Memory.load_file()
-    |> Interpreter.run({12, 2})
+    |> Memory.set_noun(12)
+    |> Memory.set_verb(2)
+    |> Interpreter.run()
     |> Enum.at(0)
   end
 
   def part_2 do
-    program = Memory.load_file("data/day02-input.txt")
+    memory = Memory.load_file("data/day02-input.txt")
 
     results =
       for noun <- 0..99, verb <- 0..99 do
         output =
-          program
-          |> Interpreter.run({noun, verb})
+          memory
+          |> Memory.set_noun(noun)
+          |> Memory.set_verb(verb)
+          |> Interpreter.run()
           |> Enum.at(0)
 
         {noun, verb, output}
