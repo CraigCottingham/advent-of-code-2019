@@ -45,6 +45,19 @@ defmodule AoC.Intcode.Interpreter.Spec do
       end
 
       it "tests opcode 4 (output)" do
+        {:ok, agent} = Agent.start_link(fn -> nil end)
+        output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
+
+        Interpreter.initialize()
+        |> Interpreter.set_memory([4, 3, 99, 2])
+        |> Interpreter.set_output(output_fn)
+        |> Interpreter.run()
+        |> expect()
+        |> to(eq([4, 3, 99, 2]))
+
+        expect(Agent.get(agent, fn value -> value end) |> to(eq(2)))
+
+        Agent.stop(agent)
       end
     end
   end

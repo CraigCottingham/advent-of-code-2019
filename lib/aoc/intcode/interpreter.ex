@@ -57,6 +57,15 @@ defmodule AoC.Intcode.Interpreter do
 
         step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
 
+      # output
+      4 ->
+        source = Memory.read(memory, ip + 1)
+
+        value = Memory.read(memory, source)
+        state.output_fn.(value)
+
+        step(%{state | ip: ip + 2})
+
       # exit
       99 ->
         {:halt, state}
