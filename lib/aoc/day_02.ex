@@ -1,15 +1,17 @@
 defmodule AoC.Day02 do
   @moduledoc false
 
+  alias AoC.Intcode.Memory
+
   def part_1 do
     "data/day02-input.txt"
-    |> load_program()
+    |> Memory.load_file()
     |> run_intcode_program({12, 2})
     |> Enum.at(0)
   end
 
   def part_2 do
-    program = load_program("data/day02-input.txt")
+    program = Memory.load_file("data/day02-input.txt")
 
     results =
       for noun <- 0..99, verb <- 0..99 do
@@ -27,15 +29,15 @@ defmodule AoC.Day02 do
     end
   end
 
-  def load_program(filename) do
-    filename
-    |> File.stream!()
-    |> Enum.map(&String.trim/1)
-    |> List.first()
-    |> String.split(",")
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&String.to_integer/1)
-  end
+  # def load_program(filename) do
+  #   filename
+  #   |> File.stream!()
+  #   |> Enum.map(&String.trim/1)
+  #   |> List.first()
+  #   |> String.split(",")
+  #   |> Enum.map(&String.trim/1)
+  #   |> Enum.map(&String.to_integer/1)
+  # end
 
   def run_intcode_program(program, {noun, verb} \\ {nil, nil}) do
     mem =
