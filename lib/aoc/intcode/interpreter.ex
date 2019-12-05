@@ -1,6 +1,8 @@
 defmodule AoC.Intcode.Interpreter do
   @moduledoc false
 
+  import ExPrintf
+
   alias AoC.Intcode.Memory
 
   def initialize do
@@ -23,10 +25,19 @@ defmodule AoC.Intcode.Interpreter do
   def set_memory(state, memory), do: %{state | memory: memory}
   def set_output(state, fun), do: %{state | output_fn: fun}
 
+  defp decode(opcode),
+    do:
+      Regex.named_captures(
+        ~r/^(?<mode_3>\d)(?<mode_2>\d)(?<mode_1>\d)(?<instruction>\d{2})$/,
+        sprintf("%05d", [opcode])
+      )
+
   defp step(%{memory: memory, ip: ip} = state) do
-    case Memory.read(memory, ip) do
+    %{"instruction" => instruction} = _decoded_opcode = decode(Memory.read(memory, ip))
+
+    case instruction do
       # add
-      1 ->
+      "01" ->
         source_1 = Memory.read(memory, ip + 1)
         source_2 = Memory.read(memory, ip + 2)
         dest = Memory.read(memory, ip + 3)
@@ -38,7 +49,7 @@ defmodule AoC.Intcode.Interpreter do
         step(%{state | memory: Memory.write(memory, dest, result), ip: ip + 4})
 
       # multiply
-      2 ->
+      "02" ->
         source_1 = Memory.read(memory, ip + 1)
         source_2 = Memory.read(memory, ip + 2)
         dest = Memory.read(memory, ip + 3)
@@ -50,7 +61,7 @@ defmodule AoC.Intcode.Interpreter do
         step(%{state | memory: Memory.write(memory, dest, result), ip: ip + 4})
 
       # input
-      3 ->
+      "03" ->
         dest = Memory.read(memory, ip + 1)
 
         value = state.input_fn.()
@@ -58,7 +69,7 @@ defmodule AoC.Intcode.Interpreter do
         step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
 
       # output
-      4 ->
+      "04" ->
         source = Memory.read(memory, ip + 1)
 
         value = Memory.read(memory, source)
@@ -67,7 +78,7 @@ defmodule AoC.Intcode.Interpreter do
         step(%{state | ip: ip + 2})
 
       # exit
-      99 ->
+      "99" ->
         {:halt, state}
 
       _ ->

@@ -32,7 +32,6 @@ defmodule AoC.Day04 do
     number
     |> Integer.to_string()
     |> String.split("", trim: true)
-    # ["1", "2", "3", "4", "5", "6"]
     |> Enum.reduce_while("0", fn
       digit, acc when digit >= acc -> {:cont, digit}
       _, _ -> {:halt, nil}
