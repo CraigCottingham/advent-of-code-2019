@@ -178,7 +178,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
 
     context "opcode 7 (less than)" do
       it "tests happy path (input < 8), position mode" do
-        input_fn = fn -> 0 end
+        input_fn = fn -> 7 end
         output_fn = fn value -> value end
 
         Interpreter.initialize()
@@ -192,7 +192,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
       end
 
       it "tests happy path (input < 8), immediate mode" do
-        input_fn = fn -> 0 end
+        input_fn = fn -> 7 end
         output_fn = fn value -> value end
 
         Interpreter.initialize()
