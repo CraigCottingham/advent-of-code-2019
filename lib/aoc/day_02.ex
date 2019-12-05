@@ -4,11 +4,14 @@ defmodule AoC.Day02 do
   alias AoC.Intcode.{Interpreter, Memory}
 
   def part_1 do
-    "data/day02-input.txt"
-    |> Memory.load_from_file()
-    |> set_noun(12)
-    |> set_verb(2)
-    |> Interpreter.initialize()
+    memory =
+      "data/day02-input.txt"
+      |> Memory.load_from_file()
+      |> set_noun(12)
+      |> set_verb(2)
+
+    Interpreter.initialize()
+    |> Interpreter.set_memory(memory)
     |> Interpreter.run()
     |> Memory.read(0)
   end
@@ -18,11 +21,14 @@ defmodule AoC.Day02 do
 
     results =
       for noun <- 0..99, verb <- 0..99 do
-        output =
+        mem =
           memory
           |> set_noun(noun)
           |> set_verb(verb)
-          |> Interpreter.initialize()
+
+        output =
+          Interpreter.initialize()
+          |> Interpreter.set_memory(mem)
           |> Interpreter.run()
           |> Memory.read(0)
 
