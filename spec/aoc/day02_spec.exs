@@ -31,8 +31,8 @@ defmodule AoC.Day02.Spec do
       |> Enum.each(fn {noun, verb} ->
         output =
           memory
-          |> Memory.set_noun(noun)
-          |> Memory.set_verb(verb)
+          |> AoC.Day02.set_noun(noun)
+          |> AoC.Day02.set_verb(verb)
           |> Interpreter.run()
           |> Enum.at(0)
 

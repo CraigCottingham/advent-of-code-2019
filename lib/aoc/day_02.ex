@@ -6,8 +6,8 @@ defmodule AoC.Day02 do
   def part_1 do
     "data/day02-input.txt"
     |> Memory.load_file()
-    |> Memory.set_noun(12)
-    |> Memory.set_verb(2)
+    |> set_noun(12)
+    |> set_verb(2)
     |> Interpreter.run()
     |> Enum.at(0)
   end
@@ -19,8 +19,8 @@ defmodule AoC.Day02 do
       for noun <- 0..99, verb <- 0..99 do
         output =
           memory
-          |> Memory.set_noun(noun)
-          |> Memory.set_verb(verb)
+          |> set_noun(noun)
+          |> set_verb(verb)
           |> Interpreter.run()
           |> Enum.at(0)
 
@@ -32,4 +32,10 @@ defmodule AoC.Day02 do
       _ -> :error
     end
   end
+
+  def set_noun(mem, nil), do: mem
+  def set_noun(mem, noun), do: List.replace_at(mem, 1, noun)
+
+  def set_verb(mem, nil), do: mem
+  def set_verb(mem, verb), do: List.replace_at(mem, 2, verb)
 end
