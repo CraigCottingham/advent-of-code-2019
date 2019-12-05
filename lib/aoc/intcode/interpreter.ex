@@ -3,8 +3,8 @@ defmodule AoC.Intcode.Interpreter do
 
   alias AoC.Intcode.Memory
 
-  def initialize(memory \\ []) do
-    %{memory: memory, ip: 0}
+  def initialize do
+    %{memory: [], ip: 0, input_fn: nil, output_fn: nil}
   end
 
   def run(state) do
@@ -17,6 +17,11 @@ defmodule AoC.Intcode.Interpreter do
         nil
     end
   end
+
+  def set_input(state, fun), do: %{state | input_fn: fun}
+  def set_ip(state, ip), do: %{state | ip: ip}
+  def set_memory(state, memory), do: %{state | memory: memory}
+  def set_output(state, fun), do: %{state | output_fn: fun}
 
   defp step(%{memory: memory, ip: ip} = state) do
     case Memory.read(memory, ip) do
