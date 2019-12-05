@@ -66,10 +66,10 @@ defmodule AllSolutions.Spec do
         |> to(eq(shared.solutions |> Map.fetch!("day_05") |> List.first()))
     )
 
-    # it("part 2",
-    #   do:
-    #     expect(AoC.Day05.part_2())
-    #     |> to(eq(shared.solutions |> Map.fetch!("day_05") |> List.last()))
-    # )
+    it("part 2",
+      do:
+        expect(AoC.Day05.part_2())
+        |> to(eq(shared.solutions |> Map.fetch!("day_05") |> List.last()))
+    )
   end
 end
