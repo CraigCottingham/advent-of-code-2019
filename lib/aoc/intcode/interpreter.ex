@@ -32,36 +32,40 @@ defmodule AoC.Intcode.Interpreter do
         sprintf("%05d", [opcode])
       )
 
-  defp step(%{memory: memory, ip: ip} = state) do
-    %{"instruction" => instruction} = _decoded_opcode = decode(Memory.read(memory, ip))
+  defp get_mode("0"), do: :position
+  defp get_mode("1"), do: :immediate
 
-    case instruction do
+  defp get_value(_memory, value, :immediate), do: value
+  defp get_value(memory, address, :position), do: Memory.read(memory, address)
+
+  defp step(%{memory: memory, ip: ip} = state) do
+    case decode(Memory.read(memory, ip)) do
       # add
-      "01" ->
-        source_1 = Memory.read(memory, ip + 1)
-        source_2 = Memory.read(memory, ip + 2)
+      %{"instruction" => "01", "mode_1" => mode_1, "mode_2" => mode_2} ->
+        param_1 = Memory.read(memory, ip + 1)
+        param_2 = Memory.read(memory, ip + 2)
         dest = Memory.read(memory, ip + 3)
 
-        value_1 = Memory.read(memory, source_1)
-        value_2 = Memory.read(memory, source_2)
+        value_1 = get_value(memory, param_1, get_mode(mode_1))
+        value_2 = get_value(memory, param_2, get_mode(mode_2))
         result = value_1 + value_2
 
         step(%{state | memory: Memory.write(memory, dest, result), ip: ip + 4})
 
       # multiply
-      "02" ->
-        source_1 = Memory.read(memory, ip + 1)
-        source_2 = Memory.read(memory, ip + 2)
+      %{"instruction" => "02", "mode_1" => mode_1, "mode_2" => mode_2} ->
+        param_1 = Memory.read(memory, ip + 1)
+        param_2 = Memory.read(memory, ip + 2)
         dest = Memory.read(memory, ip + 3)
 
-        value_1 = Memory.read(memory, source_1)
-        value_2 = Memory.read(memory, source_2)
+        value_1 = get_value(memory, param_1, get_mode(mode_1))
+        value_2 = get_value(memory, param_2, get_mode(mode_2))
         result = value_1 * value_2
 
         step(%{state | memory: Memory.write(memory, dest, result), ip: ip + 4})
 
       # input
-      "03" ->
+      %{"instruction" => "03"} ->
         dest = Memory.read(memory, ip + 1)
 
         value = state.input_fn.()
@@ -69,16 +73,16 @@ defmodule AoC.Intcode.Interpreter do
         step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
 
       # output
-      "04" ->
-        source = Memory.read(memory, ip + 1)
+      %{"instruction" => "04", "mode_1" => mode} ->
+        param = Memory.read(memory, ip + 1)
 
-        value = Memory.read(memory, source)
+        value = get_value(memory, param, get_mode(mode))
         state.output_fn.(value)
 
         step(%{state | ip: ip + 2})
 
       # exit
-      "99" ->
+      %{"instruction" => "99"} ->
         {:halt, state}
 
       _ ->
