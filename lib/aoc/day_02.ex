@@ -8,6 +8,7 @@ defmodule AoC.Day02 do
     |> Memory.load_from_file()
     |> set_noun(12)
     |> set_verb(2)
+    |> Interpreter.initialize()
     |> Interpreter.run()
     |> Memory.read(0)
   end
@@ -21,6 +22,7 @@ defmodule AoC.Day02 do
           memory
           |> set_noun(noun)
           |> set_verb(verb)
+          |> Interpreter.initialize()
           |> Interpreter.run()
           |> Memory.read(0)
 

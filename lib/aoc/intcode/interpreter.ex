@@ -3,9 +3,11 @@ defmodule AoC.Intcode.Interpreter do
 
   alias AoC.Intcode.Memory
 
-  def run(memory) do
-    state = %{memory: memory, ip: 0}
+  def initialize(memory \\ []) do
+    %{memory: memory, ip: 0}
+  end
 
+  def run(state) do
     case step(state) do
       {:halt, %{memory: mem}} ->
         mem

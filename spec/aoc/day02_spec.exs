@@ -7,13 +7,28 @@ defmodule AoC.Day02.Spec do
 
   describe "sanity checks" do
     it "tests run_intcode_program/2" do
-      expect(Interpreter.run([1, 0, 0, 0, 99])) |> to(eq([2, 0, 0, 0, 99]))
-      expect(Interpreter.run([2, 3, 0, 3, 99])) |> to(eq([2, 3, 0, 6, 99]))
+      [1, 0, 0, 0, 99]
+      |> Interpreter.initialize()
+      |> Interpreter.run()
+      |> expect()
+      |> to(eq([2, 0, 0, 0, 99]))
 
-      expect(Interpreter.run([2, 4, 4, 5, 99, 0]))
+      [2, 3, 0, 3, 99]
+      |> Interpreter.initialize()
+      |> Interpreter.run()
+      |> expect()
+      |> to(eq([2, 3, 0, 6, 99]))
+
+      [2, 4, 4, 5, 99, 0]
+      |> Interpreter.initialize()
+      |> Interpreter.run()
+      |> expect()
       |> to(eq([2, 4, 4, 5, 99, 9801]))
 
-      expect(Interpreter.run([1, 1, 1, 4, 99, 5, 6, 0, 99]))
+      [1, 1, 1, 4, 99, 5, 6, 0, 99]
+      |> Interpreter.initialize()
+      |> Interpreter.run()
+      |> expect()
       |> to(eq([30, 1, 1, 4, 2, 5, 6, 0, 99]))
     end
 
@@ -33,6 +48,7 @@ defmodule AoC.Day02.Spec do
           memory
           |> AoC.Day02.set_noun(noun)
           |> AoC.Day02.set_verb(verb)
+          |> Interpreter.initialize()
           |> Interpreter.run()
           |> Memory.read(0)
 
