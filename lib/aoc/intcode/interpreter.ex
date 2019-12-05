@@ -191,7 +191,7 @@ defmodule AoC.Intcode.Interpreter do
     value_2 = get_value(memory, param_2, get_mode(mode_2))
 
     new_ip =
-      if value_1 == 1 do
+      if value_1 != 0 do
         value_2
       else
         ip + 3
