@@ -18,7 +18,7 @@ defmodule AoC.Day02.Spec do
     end
 
     it "tests run_intcode_program/2 with varying input" do
-      memory = Memory.load_file("data/day02-input.txt")
+      memory = Memory.load_from_file("data/day02-input.txt")
 
       [
         {0, 0},

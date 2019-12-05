@@ -5,7 +5,7 @@ defmodule AoC.Day02 do
 
   def part_1 do
     "data/day02-input.txt"
-    |> Memory.load_file()
+    |> Memory.load_from_file()
     |> set_noun(12)
     |> set_verb(2)
     |> Interpreter.run()
@@ -13,7 +13,7 @@ defmodule AoC.Day02 do
   end
 
   def part_2 do
-    memory = Memory.load_file("data/day02-input.txt")
+    memory = Memory.load_from_file("data/day02-input.txt")
 
     results =
       for noun <- 0..99, verb <- 0..99 do
