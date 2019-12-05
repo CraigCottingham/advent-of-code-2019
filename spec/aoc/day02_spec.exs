@@ -34,7 +34,7 @@ defmodule AoC.Day02.Spec do
           |> AoC.Day02.set_noun(noun)
           |> AoC.Day02.set_verb(verb)
           |> Interpreter.run()
-          |> Enum.at(0)
+          |> Memory.read(0)
 
         expect(output) |> to(eq(noun * 576_000 + verb + 682_644))
       end)

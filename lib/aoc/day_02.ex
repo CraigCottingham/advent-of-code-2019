@@ -9,7 +9,7 @@ defmodule AoC.Day02 do
     |> set_noun(12)
     |> set_verb(2)
     |> Interpreter.run()
-    |> Enum.at(0)
+    |> Memory.read(0)
   end
 
   def part_2 do
@@ -22,7 +22,7 @@ defmodule AoC.Day02 do
           |> set_noun(noun)
           |> set_verb(verb)
           |> Interpreter.run()
-          |> Enum.at(0)
+          |> Memory.read(0)
 
         {noun, verb, output}
       end
@@ -34,8 +34,8 @@ defmodule AoC.Day02 do
   end
 
   def set_noun(mem, nil), do: mem
-  def set_noun(mem, noun), do: List.replace_at(mem, 1, noun)
+  def set_noun(mem, noun), do: Memory.write(mem, 1, noun)
 
   def set_verb(mem, nil), do: mem
-  def set_verb(mem, verb), do: List.replace_at(mem, 2, verb)
+  def set_verb(mem, verb), do: Memory.write(mem, 2, verb)
 end
