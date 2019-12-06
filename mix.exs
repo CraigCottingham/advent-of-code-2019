@@ -34,6 +34,7 @@ defmodule AoC.MixProject do
       {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.7", only: :test},
       {:exprintf, "~> 0.2.1"},
+      {:libgraph, "~> 0.13.3"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
