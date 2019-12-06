@@ -10,6 +10,20 @@ defmodule AoC.Day06 do
   end
 
   def part_2 do
+    "data/day06-input.txt"
+    |> File.stream!()
+    |> Enum.map(&String.trim/1)
+    |> load_graph(:undirected)
+    |> orbital_transfers("YOU", "SAN")
+  end
+
+  def orbital_transfers(graph, from, to) do
+    shortest_path = Graph.get_shortest_path(graph, from, to)
+
+    # -1 because we don't need to transfer from YOU to whatever YOU is orbiting
+    # -1 because we don't need to transfer from whatever SAN is orbiting to SAN
+    # -1 because shortest_path is the vertices, and we want the edges between them
+    Enum.count(shortest_path) - 3
   end
 
   def root(graph),
