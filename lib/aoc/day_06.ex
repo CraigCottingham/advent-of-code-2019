@@ -31,16 +31,23 @@ defmodule AoC.Day06 do
     end)
   end
 
-  defp add_orbit(graph, parent, child) do
+  defp add_orbit(graph, parent, child, :directed) do
     graph
     |> Graph.add_vertices([parent, child])
     |> Graph.add_edge(child, parent)
   end
 
-  defp load_graph(lines) do
+  defp add_orbit(graph, parent, child, :undirected) do
+    graph
+    |> Graph.add_vertices([parent, child])
+    |> Graph.add_edge(child, parent)
+    |> Graph.add_edge(parent, child)
+  end
+
+  defp load_graph(lines, type \\ :directed) do
     Enum.reduce(lines, Graph.new(), fn line, graph ->
       {parent, child} = split_orbit_string(line)
-      add_orbit(graph, parent, child)
+      add_orbit(graph, parent, child, type)
     end)
   end
 
