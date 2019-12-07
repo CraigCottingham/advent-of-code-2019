@@ -16,25 +16,81 @@ defmodule AoC.Day07 do
   def part_2 do
   end
 
-  def run_amplifiers(memory, phase_settings) do
-    {:ok, agent} = Agent.start_link(fn -> 0 end)
+  def run_amplifiers(memory, [ps1, ps2, ps3, ps4, ps5]) do
+    {:ok, agent_1} = Agent.start_link(fn -> [ps1, 0] end)
+    {:ok, agent_2} = Agent.start_link(fn -> [ps2] end)
+    {:ok, agent_3} = Agent.start_link(fn -> [ps3] end)
+    {:ok, agent_4} = Agent.start_link(fn -> [ps4] end)
+    {:ok, agent_5} = Agent.start_link(fn -> [ps5] end)
+    {:ok, agent_out} = Agent.start_link(fn -> nil end)
 
-    input_fn = fn -> Agent.get_and_update(agent, fn [value | rest] -> {value, rest} end) end
-    output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
+    input_fn_1 = fn -> Agent.get_and_update(agent_1, fn [value | rest] -> {value, rest} end) end
+    input_fn_2 = fn -> Agent.get_and_update(agent_2, fn [value | rest] -> {value, rest} end) end
+    input_fn_3 = fn -> Agent.get_and_update(agent_3, fn [value | rest] -> {value, rest} end) end
+    input_fn_4 = fn -> Agent.get_and_update(agent_4, fn [value | rest] -> {value, rest} end) end
+    input_fn_5 = fn -> Agent.get_and_update(agent_5, fn [value | rest] -> {value, rest} end) end
 
-    Enum.each(phase_settings, fn ps ->
-      Agent.update(agent, fn value -> [ps, value] end)
+    output_fn_1 = fn value ->
+      Agent.update(agent_2, fn list -> Enum.reverse([value | list]) end)
+    end
 
+    output_fn_2 = fn value ->
+      Agent.update(agent_3, fn list -> Enum.reverse([value | list]) end)
+    end
+
+    output_fn_3 = fn value ->
+      Agent.update(agent_4, fn list -> Enum.reverse([value | list]) end)
+    end
+
+    output_fn_4 = fn value ->
+      Agent.update(agent_5, fn list -> Enum.reverse([value | list]) end)
+    end
+
+    output_fn_5 = fn value -> Agent.update(agent_out, fn _ -> value end) end
+
+    _vm_1 =
       Interpreter.initialize()
       |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn)
-      |> Interpreter.set_output(output_fn)
+      |> Interpreter.set_input(input_fn_1)
+      |> Interpreter.set_output(output_fn_1)
       |> Interpreter.run()
-    end)
 
-    result = Agent.get(agent, fn value -> value end)
+    _vm_2 =
+      Interpreter.initialize()
+      |> Interpreter.set_memory(memory)
+      |> Interpreter.set_input(input_fn_2)
+      |> Interpreter.set_output(output_fn_2)
+      |> Interpreter.run()
 
-    Agent.stop(agent)
+    _vm_3 =
+      Interpreter.initialize()
+      |> Interpreter.set_memory(memory)
+      |> Interpreter.set_input(input_fn_3)
+      |> Interpreter.set_output(output_fn_3)
+      |> Interpreter.run()
+
+    _vm_4 =
+      Interpreter.initialize()
+      |> Interpreter.set_memory(memory)
+      |> Interpreter.set_input(input_fn_4)
+      |> Interpreter.set_output(output_fn_4)
+      |> Interpreter.run()
+
+    _vm_5 =
+      Interpreter.initialize()
+      |> Interpreter.set_memory(memory)
+      |> Interpreter.set_input(input_fn_5)
+      |> Interpreter.set_output(output_fn_5)
+      |> Interpreter.run()
+
+    result = Agent.get(agent_out, fn value -> value end)
+
+    Agent.stop(agent_1)
+    Agent.stop(agent_2)
+    Agent.stop(agent_3)
+    Agent.stop(agent_4)
+    Agent.stop(agent_5)
+    Agent.stop(agent_out)
 
     result
   end

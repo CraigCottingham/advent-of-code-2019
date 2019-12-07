@@ -6,15 +6,15 @@ defmodule AoC.Intcode.Interpreter do
   alias AoC.Intcode.Memory
 
   def initialize do
-    %{memory: [], ip: 0, input_fn: nil, output_fn: nil, trace: false, ip_width: 4}
+    %{state: :ready, memory: [], ip: 0, input_fn: nil, output_fn: nil, trace: false, ip_width: 4}
   end
 
   def run(state) do
     trace("\n\n", state)
 
-    case step(state) do
-      {:halt, %{memory: mem}} ->
-        mem
+    case step(%{state | state: :running}) do
+      {:halt, state} ->
+        {:halt, state}
 
       {:invalid_opcode, opcode, %{memory: mem, ip: ip}} ->
         IO.puts("invalid opcode (#{opcode}) at position #{ip}: #{inspect(mem)}")
@@ -152,15 +152,20 @@ defmodule AoC.Intcode.Interpreter do
   defp execute(%{"instruction" => "03"}, %{memory: memory, ip: ip} = state) do
     dest = Memory.read(memory, ip + 1)
 
-    value = state.input_fn.()
+    case state.input_fn.() do
+      nil ->
+        trace0("IN!", state)
+        {:halt, %{state | state: :stopped}}
 
-    trace1(
-      "IN",
-      {dest, value, :position},
-      state
-    )
+      value ->
+        trace1(
+          "IN",
+          {dest, value, :position},
+          state
+        )
 
-    step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
+        step(%{state | memory: Memory.write(memory, dest, value), ip: ip + 2})
+    end
   end
 
   # output
@@ -302,7 +307,7 @@ defmodule AoC.Intcode.Interpreter do
       state
     )
 
-    {:halt, state}
+    {:halt, %{state | state: :stopped}}
   end
 
   # invalid opcode
