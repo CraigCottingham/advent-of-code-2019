@@ -4,16 +4,18 @@ defmodule AoC.Day02 do
   alias AoC.Intcode.{Interpreter, Memory}
 
   def part_1 do
-    memory =
+    initial_memory =
       "data/day02-input.txt"
       |> Memory.load_from_file()
       |> set_noun(12)
       |> set_verb(2)
 
-    Interpreter.initialize()
-    |> Interpreter.set_memory(memory)
-    |> Interpreter.run()
-    |> Memory.read(0)
+    {:halt, %{state: :stopped, memory: final_memory}} =
+      Interpreter.initialize()
+      |> Interpreter.set_memory(initial_memory)
+      |> Interpreter.run()
+
+    Memory.read(final_memory, 0)
   end
 
   def part_2 do
@@ -21,18 +23,17 @@ defmodule AoC.Day02 do
 
     results =
       for noun <- 0..99, verb <- 0..99 do
-        mem =
+        initial_memory =
           memory
           |> set_noun(noun)
           |> set_verb(verb)
 
-        output =
+        {:halt, %{state: :stopped, memory: final_memory}} =
           Interpreter.initialize()
-          |> Interpreter.set_memory(mem)
+          |> Interpreter.set_memory(initial_memory)
           |> Interpreter.run()
-          |> Memory.read(0)
 
-        {noun, verb, output}
+        {noun, verb, Memory.read(final_memory, 0)}
       end
 
     case Enum.find(results, fn {_, _, value} -> value == 19_690_720 end) do
