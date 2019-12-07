@@ -6,11 +6,20 @@ defmodule AoC.Intcode.Interpreter do
   alias AoC.Intcode.Memory
 
   def initialize do
-    %{state: :ready, memory: [], ip: 0, input_fn: nil, output_fn: nil, trace: false, ip_width: 4}
+    %{
+      state: :ready,
+      memory: [],
+      ip: 0,
+      input_fn: nil,
+      output_fn: nil,
+      trace: false,
+      trace_prefix: "",
+      ip_width: 4
+    }
   end
 
   def run(state) do
-    trace("\n\n", state)
+    trace("running from IP #{state.ip}", state)
 
     case step(%{state | state: :running}) do
       {:halt, state} ->
@@ -43,6 +52,7 @@ defmodule AoC.Intcode.Interpreter do
   def set_output(state, fun), do: %{state | output_fn: fun}
   def set_trace(state, true), do: %{state | trace: true}
   def set_trace(state, false), do: %{state | trace: false}
+  def set_trace_prefix(state, prefix), do: %{state | trace_prefix: prefix}
 
   defp decode(opcode),
     do:
@@ -63,7 +73,7 @@ defmodule AoC.Intcode.Interpreter do
   defp trace(_, %{trace: false}), do: nil
 
   defp trace(msg, %{trace: true} = state) do
-    "#{String.duplicate(" ", state.ip_width)}  %s"
+    "#{state.trace_prefix}#{String.duplicate(" ", state.ip_width)}  %s"
     |> sprintf([msg])
     |> IO.puts()
   end
@@ -71,7 +81,7 @@ defmodule AoC.Intcode.Interpreter do
   defp trace0(_, %{trace: false}), do: nil
 
   defp trace0(mnemonic, %{trace: true} = state) do
-    "%0#{state.ip_width}d:  %-4s"
+    "#{state.trace_prefix}%0#{state.ip_width}d:  %-4s"
     |> sprintf([state.ip, mnemonic])
     |> IO.puts()
   end
@@ -79,7 +89,7 @@ defmodule AoC.Intcode.Interpreter do
   defp trace1(_, _, %{trace: false}), do: nil
 
   defp trace1(mnemonic, param_1, %{trace: true} = state) do
-    "%0#{state.ip_width}d:  %-4s %s"
+    "#{state.trace_prefix}%0#{state.ip_width}d:  %-4s %s"
     |> sprintf([state.ip, mnemonic, vstr(param_1)])
     |> IO.puts()
   end
@@ -87,7 +97,7 @@ defmodule AoC.Intcode.Interpreter do
   defp trace2(_, _, _, %{trace: false}), do: nil
 
   defp trace2(mnemonic, param_1, param_2, %{trace: true} = state) do
-    "%0#{state.ip_width}d:  %-4s %s -> %s"
+    "#{state.trace_prefix}%0#{state.ip_width}d:  %-4s %s -> %s"
     |> sprintf([state.ip, mnemonic, vstr(param_1), vstr(param_2)])
     |> IO.puts()
   end
@@ -95,7 +105,7 @@ defmodule AoC.Intcode.Interpreter do
   defp trace3(_, _, _, _, %{trace: false}), do: nil
 
   defp trace3(mnemonic, param_1, param_2, {dest, result}, %{trace: true} = state) do
-    "%0#{state.ip_width}d:  %-4s %s, %s -> %s"
+    "#{state.trace_prefix}%0#{state.ip_width}d:  %-4s %s, %s -> %s"
     |> sprintf([state.ip, mnemonic, vstr(param_1), vstr(param_2), vstr({dest, result, :position})])
     |> IO.puts()
   end
@@ -155,7 +165,7 @@ defmodule AoC.Intcode.Interpreter do
     case state.input_fn.() do
       nil ->
         trace0("IN!", state)
-        {:halt, %{state | state: :stopped}}
+        {:halt, %{state | state: :blocked}}
 
       value ->
         trace1(
