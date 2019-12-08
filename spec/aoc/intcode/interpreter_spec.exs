@@ -14,6 +14,22 @@ defmodule AoC.Intcode.Interpreter.Spec do
     end
   end
 
+  example_group "set_output_fn/1" do
+    it do
+      {:ok, agent} = Agent.start_link(fn -> nil end)
+      output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
+
+      vm = Task.async(Interpreter, :initialize, [%{memory: [104, 3, 99, 2]}])
+      Interpreter.set_output_fn(vm, output_fn)
+      Interpreter.start(vm)
+      {:halt, %{state: :stopped}} = Task.await(vm)
+
+      expect(Agent.get(agent, fn value -> value end)) |> to(eq(3))
+
+      Agent.stop(agent)
+    end
+  end
+
   example_group "run/1" do
     context "opcode 1 (add)" do
       it "tests position mode" do

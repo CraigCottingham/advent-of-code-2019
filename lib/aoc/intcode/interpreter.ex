@@ -27,6 +27,8 @@ defmodule AoC.Intcode.Interpreter do
 
   def start(task), do: send(task.pid, :start)
 
+  def set_output_fn(task, output_fn), do: send(task.pid, {:set_output_fn, output_fn})
+
   def run(%{state: :ready} = state) do
     receive do
       :start ->
@@ -34,6 +36,9 @@ defmodule AoC.Intcode.Interpreter do
 
       :term ->
         {:halt, %{state | state: :term}}
+
+      {:set_output_fn, fun} ->
+        run(%{state | output_fn: fun})
     end
   end
 
