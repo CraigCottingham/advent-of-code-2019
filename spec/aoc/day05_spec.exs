@@ -11,7 +11,9 @@ defmodule AoC.Day05.Spec do
       output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
       vm =
-        Task.async(Interpreter, :initialize, [%{memory: [3, 0, 4, 0, 99], output_fn: output_fn}])
+        Task.async(Interpreter, :initialize, [
+          %{state: :running, memory: [3, 0, 4, 0, 99], output_fn: output_fn}
+        ])
 
       send(vm.pid, 99)
       {:halt, %{state: :stopped, memory: final_memory}} = Task.await(vm)
@@ -23,13 +25,15 @@ defmodule AoC.Day05.Spec do
     end
 
     it "tests parameter modes" do
-      vm = Task.async(Interpreter, :initialize, [%{memory: [1002, 4, 3, 4, 33]}])
+      vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: [1002, 4, 3, 4, 33]}])
       {:halt, %{memory: memory}} = Task.await(vm)
       expect(memory) |> to(eq([1002, 4, 3, 4, 99]))
     end
 
     it "tests negative integers" do
-      vm = Task.async(Interpreter, :initialize, [%{memory: [1101, 100, -1, 4, 0]}])
+      vm =
+        Task.async(Interpreter, :initialize, [%{state: :running, memory: [1101, 100, -1, 4, 0]}])
+
       {:halt, %{memory: memory}} = Task.await(vm)
       expect(memory) |> to(eq([1101, 100, -1, 4, 99]))
     end

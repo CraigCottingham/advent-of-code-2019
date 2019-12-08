@@ -8,7 +8,11 @@ defmodule AoC.Day05 do
     output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
     memory = Memory.load_from_file("data/day05-input.txt")
 
-    vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+    vm =
+      Task.async(Interpreter, :initialize, [
+        %{state: :running, memory: memory, output_fn: output_fn}
+      ])
+
     send(vm.pid, 1)
     {:halt, %{state: :stopped}} = Task.await(vm)
 
@@ -23,7 +27,11 @@ defmodule AoC.Day05 do
     output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
     memory = Memory.load_from_file("data/day05-input.txt")
 
-    vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+    vm =
+      Task.async(Interpreter, :initialize, [
+        %{state: :running, memory: memory, output_fn: output_fn}
+      ])
+
     send(vm.pid, 5)
     {:halt, %{state: :stopped}} = Task.await(vm)
 
