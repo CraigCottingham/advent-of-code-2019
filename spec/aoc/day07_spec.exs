@@ -9,10 +9,9 @@ defmodule AoC.Day07.Spec do
       phase_settings = [4, 3, 2, 1, 0]
       output = 43210
 
-      {result, _} =
+      result =
         AoC.Day07.setup(program, phase_settings)
         |> AoC.Day07.run_amplifiers()
-        |> AoC.Day07.shutdown()
 
       expect(result) |> to(eq(output))
     end
@@ -49,10 +48,9 @@ defmodule AoC.Day07.Spec do
       phase_settings = [0, 1, 2, 3, 4]
       output = 54321
 
-      {result, _} =
+      result =
         AoC.Day07.setup(program, phase_settings)
         |> AoC.Day07.run_amplifiers()
-        |> AoC.Day07.shutdown()
 
       expect(result) |> to(eq(output))
     end
@@ -98,10 +96,9 @@ defmodule AoC.Day07.Spec do
       phase_settings = [1, 0, 4, 3, 2]
       output = 65210
 
-      {result, _} =
+      result =
         AoC.Day07.setup(program, phase_settings)
         |> AoC.Day07.run_amplifiers()
-        |> AoC.Day07.shutdown()
 
       expect(result) |> to(eq(output))
     end
@@ -142,10 +139,9 @@ defmodule AoC.Day07.Spec do
       phase_settings = [9, 8, 7, 6, 5]
       output = 139_629_729
 
-      {result, _} =
+      result =
         AoC.Day07.setup(program, phase_settings)
         |> AoC.Day07.run_amplifiers()
-        |> AoC.Day07.shutdown()
 
       expect(result) |> to(eq(output))
     end
@@ -214,10 +210,9 @@ defmodule AoC.Day07.Spec do
       phase_settings = [9, 7, 8, 5, 6]
       output = 18216
 
-      {result, _} =
+      result =
         AoC.Day07.setup(program, phase_settings)
         |> AoC.Day07.run_amplifiers()
-        |> AoC.Day07.shutdown()
 
       expect(result) |> to(eq(output))
     end

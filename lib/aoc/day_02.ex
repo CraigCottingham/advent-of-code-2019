@@ -10,11 +10,8 @@ defmodule AoC.Day02 do
       |> set_noun(12)
       |> set_verb(2)
 
-    {:halt, %{state: :stopped, memory: final_memory}} =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(initial_memory)
-      |> Interpreter.run()
-
+    vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: initial_memory}])
+    {:halt, %{state: :stopped, memory: final_memory}} = Task.await(vm)
     Memory.read(final_memory, 0)
   end
 
@@ -28,11 +25,8 @@ defmodule AoC.Day02 do
           |> set_noun(noun)
           |> set_verb(verb)
 
-        {:halt, %{state: :stopped, memory: final_memory}} =
-          Interpreter.initialize()
-          |> Interpreter.set_memory(initial_memory)
-          |> Interpreter.run()
-
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: initial_memory}])
+        {:halt, %{state: :stopped, memory: final_memory}} = Task.await(vm)
         {noun, verb, Memory.read(final_memory, 0)}
       end
 
