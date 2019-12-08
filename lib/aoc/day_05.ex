@@ -5,15 +5,12 @@ defmodule AoC.Day05 do
 
   def part_1 do
     {:ok, agent} = Agent.start_link(fn -> nil end)
-    input_fn = fn -> 1 end
     output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
     memory = Memory.load_from_file("data/day05-input.txt")
 
-    Interpreter.initialize()
-    |> Interpreter.set_memory(memory)
-    |> Interpreter.set_input(input_fn)
-    |> Interpreter.set_output(output_fn)
-    |> Interpreter.run()
+    vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+    send(vm.pid, 1)
+    {:halt, %{state: :stopped}} = Task.await(vm)
 
     result = Agent.get(agent, fn value -> value end)
     Agent.stop(agent)
@@ -23,15 +20,12 @@ defmodule AoC.Day05 do
 
   def part_2 do
     {:ok, agent} = Agent.start_link(fn -> nil end)
-    input_fn = fn -> 5 end
     output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
     memory = Memory.load_from_file("data/day05-input.txt")
 
-    Interpreter.initialize()
-    |> Interpreter.set_memory(memory)
-    |> Interpreter.set_input(input_fn)
-    |> Interpreter.set_output(output_fn)
-    |> Interpreter.run()
+    vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+    send(vm.pid, 5)
+    {:halt, %{state: :stopped}} = Task.await(vm)
 
     result = Agent.get(agent, fn value -> value end)
     Agent.stop(agent)

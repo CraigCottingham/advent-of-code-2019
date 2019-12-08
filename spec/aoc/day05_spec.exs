@@ -8,37 +8,29 @@ defmodule AoC.Day05.Spec do
   describe "sanity checks" do
     it "tests the input and output opcodes" do
       {:ok, agent} = Agent.start_link(fn -> nil end)
-      input_fn = fn -> 99 end
       output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
-      {:halt, %{memory: memory}} =
-        Interpreter.initialize()
-        |> Interpreter.set_memory([3, 0, 4, 0, 99])
-        |> Interpreter.set_input(input_fn)
-        |> Interpreter.set_output(output_fn)
-        |> Interpreter.run()
+      vm =
+        Task.async(Interpreter, :initialize, [%{memory: [3, 0, 4, 0, 99], output_fn: output_fn}])
 
-      expect(memory) |> to(eq([99, 0, 4, 0, 99]))
+      send(vm.pid, 99)
+      {:halt, %{state: :stopped, memory: final_memory}} = Task.await(vm)
+
+      expect(final_memory) |> to(eq([99, 0, 4, 0, 99]))
       expect(Agent.get(agent, fn value -> value end) |> to(eq(99)))
 
       Agent.stop(agent)
     end
 
     it "tests parameter modes" do
-      {:halt, %{memory: memory}} =
-        Interpreter.initialize()
-        |> Interpreter.set_memory([1002, 4, 3, 4, 33])
-        |> Interpreter.run()
-
+      vm = Task.async(Interpreter, :initialize, [%{memory: [1002, 4, 3, 4, 33]}])
+      {:halt, %{memory: memory}} = Task.await(vm)
       expect(memory) |> to(eq([1002, 4, 3, 4, 99]))
     end
 
     it "tests negative integers" do
-      {:halt, %{memory: memory}} =
-        Interpreter.initialize()
-        |> Interpreter.set_memory([1101, 100, -1, 4, 0])
-        |> Interpreter.run()
-
+      vm = Task.async(Interpreter, :initialize, [%{memory: [1101, 100, -1, 4, 0]}])
+      {:halt, %{memory: memory}} = Task.await(vm)
       expect(memory) |> to(eq([1101, 100, -1, 4, 99]))
     end
   end
