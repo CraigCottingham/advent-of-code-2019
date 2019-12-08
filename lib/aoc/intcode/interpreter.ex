@@ -25,9 +25,15 @@ defmodule AoC.Intcode.Interpreter do
     |> run()
   end
 
-  def start(task), do: send(task.pid, :start)
+  def start(task) do
+    send(task.pid, :start)
+    task
+  end
 
-  def set_output_fn(task, output_fn), do: send(task.pid, {:set_output_fn, output_fn})
+  def set_output_fn(task, output_fn) do
+    send(task.pid, {:set_output_fn, output_fn})
+    task
+  end
 
   def run(%{state: :ready} = state) do
     receive do

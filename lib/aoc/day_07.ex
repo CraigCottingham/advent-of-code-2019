@@ -11,10 +11,8 @@ defmodule AoC.Day07 do
     |> Enum.map(fn phase_settings ->
       setup(memory, phase_settings)
       |> run_amplifiers()
-      |> shutdown()
     end)
-    |> Enum.max_by(fn {output, _} -> output end)
-    |> elem(0)
+    |> Enum.max_by(fn output -> output end)
   end
 
   def part_2 do
@@ -25,103 +23,42 @@ defmodule AoC.Day07 do
     |> Enum.map(fn phase_settings ->
       setup(memory, phase_settings)
       |> run_amplifiers()
-      |> shutdown()
     end)
-    |> Enum.max_by(fn {output, _} -> output end)
-    |> elem(0)
+    |> Enum.max_by(fn output -> output end)
   end
 
   def setup(memory, [ps1, ps2, ps3, ps4, ps5] = phase_settings) do
-    {:ok, agent1} = Agent.start_link(fn -> [ps1, 0] end)
-    {:ok, agent2} = Agent.start_link(fn -> [ps2] end)
-    {:ok, agent3} = Agent.start_link(fn -> [ps3] end)
-    {:ok, agent4} = Agent.start_link(fn -> [ps4] end)
-    {:ok, agent5} = Agent.start_link(fn -> [ps5] end)
+    {:ok, agent} = Agent.start_link(fn -> nil end)
 
-    input_fn_1 = fn ->
-      Agent.get_and_update(agent1, fn
-        [] -> {nil, []}
-        [value | rest] -> {value, rest}
-      end)
-    end
+    amp1 = Task.async(Interpreter, :initialize, [%{memory: memory}])
+    amp2 = Task.async(Interpreter, :initialize, [%{memory: memory}])
+    amp3 = Task.async(Interpreter, :initialize, [%{memory: memory}])
+    amp4 = Task.async(Interpreter, :initialize, [%{memory: memory}])
+    amp5 = Task.async(Interpreter, :initialize, [%{memory: memory}])
 
-    input_fn_2 = fn ->
-      Agent.get_and_update(agent2, fn
-        [] -> {nil, []}
-        [value | rest] -> {value, rest}
-      end)
-    end
+    Interpreter.set_output_fn(amp1, fn value -> send(amp2.pid, value) end)
+    Interpreter.set_output_fn(amp2, fn value -> send(amp3.pid, value) end)
+    Interpreter.set_output_fn(amp3, fn value -> send(amp4.pid, value) end)
+    Interpreter.set_output_fn(amp4, fn value -> send(amp5.pid, value) end)
 
-    input_fn_3 = fn ->
-      Agent.get_and_update(agent3, fn
-        [] -> {nil, []}
-        [value | rest] -> {value, rest}
-      end)
-    end
+    Interpreter.set_output_fn(amp5, fn value ->
+      Agent.update(agent, fn _ -> value end)
+      send(amp1.pid, value)
+    end)
 
-    input_fn_4 = fn ->
-      Agent.get_and_update(agent4, fn
-        [] -> {nil, []}
-        [value | rest] -> {value, rest}
-      end)
-    end
+    Interpreter.start(amp1)
+    Interpreter.start(amp2)
+    Interpreter.start(amp3)
+    Interpreter.start(amp4)
+    Interpreter.start(amp5)
 
-    input_fn_5 = fn ->
-      Agent.get_and_update(agent5, fn
-        [] -> {nil, []}
-        [value | rest] -> {value, rest}
-      end)
-    end
+    send(amp1.pid, ps1)
+    send(amp2.pid, ps2)
+    send(amp3.pid, ps3)
+    send(amp4.pid, ps4)
+    send(amp5.pid, ps5)
 
-    output_fn_1 = fn value ->
-      Agent.update(agent2, fn list -> Enum.reverse([value | list]) end)
-    end
-
-    output_fn_2 = fn value ->
-      Agent.update(agent3, fn list -> Enum.reverse([value | list]) end)
-    end
-
-    output_fn_3 = fn value ->
-      Agent.update(agent4, fn list -> Enum.reverse([value | list]) end)
-    end
-
-    output_fn_4 = fn value ->
-      Agent.update(agent5, fn list -> Enum.reverse([value | list]) end)
-    end
-
-    output_fn_5 = fn value ->
-      Agent.update(agent1, fn list -> Enum.reverse([value | list]) end)
-    end
-
-    amp1 =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn_1)
-      |> Interpreter.set_output(output_fn_1)
-
-    amp2 =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn_2)
-      |> Interpreter.set_output(output_fn_2)
-
-    amp3 =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn_3)
-      |> Interpreter.set_output(output_fn_3)
-
-    amp4 =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn_4)
-      |> Interpreter.set_output(output_fn_4)
-
-    amp5 =
-      Interpreter.initialize()
-      |> Interpreter.set_memory(memory)
-      |> Interpreter.set_input(input_fn_5)
-      |> Interpreter.set_output(output_fn_5)
+    send(amp1.pid, 0)
 
     %{
       amp1: amp1,
@@ -129,72 +66,25 @@ defmodule AoC.Day07 do
       amp3: amp3,
       amp4: amp4,
       amp5: amp5,
-      agent1: agent1,
-      agent2: agent2,
-      agent3: agent3,
-      agent4: agent4,
-      agent5: agent5,
-      phase_settings: phase_settings
+      phase_settings: phase_settings,
+      agent: agent
     }
   end
 
-  def shutdown(
-        %{
-          agent1: agent1,
-          agent2: agent2,
-          agent3: agent3,
-          agent4: agent4,
-          agent5: agent5
-        } = amps
+  def run_amplifiers(
+        %{amp1: amp1, amp2: amp2, amp3: amp3, amp4: amp4, amp5: amp5, agent: agent} = amps
       ) do
-    result = Agent.get(agent1, fn [value | _] -> value end)
+    case Enum.all?(Task.yield_many([amp1, amp2, amp3, amp4, amp5]), fn
+           {_, {:ok, _}} -> true
+           {_, {:invalid_opcode, _, _}} -> true
+           {_, {:error, _}} -> true
+           _ -> false
+         end) do
+      true ->
+        Agent.get(agent, fn value -> value end)
 
-    Agent.stop(agent1)
-    Agent.stop(agent2)
-    Agent.stop(agent3)
-    Agent.stop(agent4)
-    Agent.stop(agent5)
-
-    {result, amps}
-  end
-
-  def run_amplifiers(%{amp1: amp1, amp2: amp2, amp3: amp3, amp4: amp4, amp5: amp5} = amps) do
-    amps =
-      case Interpreter.run(amp1) do
-        {:halt, new_amp1} ->
-          %{amps | amp1: new_amp1}
-      end
-
-    amps =
-      case Interpreter.run(amp2) do
-        {:halt, new_amp2} ->
-          %{amps | amp2: new_amp2}
-      end
-
-    amps =
-      case Interpreter.run(amp3) do
-        {:halt, new_amp3} ->
-          %{amps | amp3: new_amp3}
-      end
-
-    amps =
-      case Interpreter.run(amp4) do
-        {:halt, new_amp4} ->
-          %{amps | amp4: new_amp4}
-      end
-
-    amps =
-      case Interpreter.run(amp5) do
-        {:halt, new_amp5} ->
-          %{amps | amp5: new_amp5}
-      end
-
-    case amps.amp5.state do
-      :blocked ->
+      _ ->
         run_amplifiers(amps)
-
-      :stopped ->
-        amps
     end
   end
 
