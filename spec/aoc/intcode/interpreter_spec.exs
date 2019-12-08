@@ -5,18 +5,27 @@ defmodule AoC.Intcode.Interpreter.Spec do
 
   alias AoC.Intcode.{Interpreter, Memory}
 
+  example_group "start/1" do
+    it do
+      vm = Task.async(Interpreter, :initialize, [%{memory: [1, 0, 0, 0, 99]}])
+      Interpreter.start(vm)
+      {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
+      expect(Memory.read(memory, 0)) |> to(eq(2))
+    end
+  end
+
   example_group "run/1" do
     context "opcode 1 (add)" do
       it "tests position mode" do
         memory = [1, 0, 0, 0, 99]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory}])
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
         expect(Memory.read(memory, 0)) |> to(eq(2))
       end
 
       it "tests immediate mode" do
         memory = [1101, 5, 6, 5, 99, 0]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory}])
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
         expect(Memory.read(memory, 5)) |> to(eq(11))
       end
@@ -25,14 +34,14 @@ defmodule AoC.Intcode.Interpreter.Spec do
     context "opcode 2 (multiply)" do
       it "tests position mode" do
         memory = [2, 3, 0, 3, 99]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory}])
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
         expect(Memory.read(memory, 3)) |> to(eq(6))
       end
 
       it "tests immediate mode" do
         memory = [1102, 5, 6, 5, 99, 0]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory}])
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
         expect(Memory.read(memory, 5)) |> to(eq(30))
       end
@@ -41,7 +50,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
     context "opcode 3 (input)" do
       it do
         memory = [3, 3, 99, 0]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory}])
         send(vm.pid, 1)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
         expect(Memory.read(memory, 3)) |> to(eq(1))
@@ -54,7 +63,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [4, 3, 99, 2]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         {:halt, %{state: :stopped}} = Task.await(vm)
 
         expect(Agent.get(agent, fn value -> value end)) |> to(eq(2))
@@ -67,7 +76,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [104, 3, 99, 2]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         {:halt, %{state: :stopped}} = Task.await(vm)
 
         expect(Agent.get(agent, fn value -> value end)) |> to(eq(3))
@@ -82,7 +91,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 13, 5, 13, 14, 1101, 0, 0, 12, 4, 12, 99, 1, -1, 9]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 1)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -97,7 +106,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 1)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -110,7 +119,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 0)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -127,7 +136,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 0)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -142,7 +151,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1106, -1, 9, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 0)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -157,7 +166,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1106, -1, 9, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 2)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -174,7 +183,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 7)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -189,7 +198,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1107, -1, 8, 3, 4, 3, 99]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 7)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -204,7 +213,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 9)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -221,7 +230,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 8)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -236,7 +245,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 3, 1108, -1, 8, 3, 4, 3, 99]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 8)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -251,7 +260,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
         output_fn = fn value -> Agent.update(agent, fn _ -> value end) end
 
         memory = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 7)
         {:halt, %{state: :stopped, memory: memory}} = Task.await(vm)
 
@@ -317,7 +326,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
           99
         ]
 
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 7)
         {:halt, %{state: :stopped}} = Task.await(vm)
 
@@ -380,7 +389,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
           99
         ]
 
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 8)
         {:halt, %{state: :stopped}} = Task.await(vm)
 
@@ -443,7 +452,7 @@ defmodule AoC.Intcode.Interpreter.Spec do
           99
         ]
 
-        vm = Task.async(Interpreter, :initialize, [%{memory: memory, output_fn: output_fn}])
+        vm = Task.async(Interpreter, :initialize, [%{state: :running, memory: memory, output_fn: output_fn}])
         send(vm.pid, 9)
         {:halt, %{state: :stopped}} = Task.await(vm)
 

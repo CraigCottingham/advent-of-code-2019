@@ -25,8 +25,20 @@ defmodule AoC.Intcode.Interpreter do
     |> run()
   end
 
+  def start(task), do: send(task.pid, :start)
+
+  def run(%{state: :ready} = state) do
+    receive do
+      :start ->
+        run(%{state | state: :running})
+
+      :term ->
+        {:halt, %{state | state: :term}}
+    end
+  end
+
   def run(state) do
-    case step(%{state | state: :running}) do
+    case step(state) do
       {:cont, state} ->
         run(state)
 
