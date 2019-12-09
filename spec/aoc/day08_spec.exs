@@ -4,7 +4,16 @@ defmodule AoC.Day08.Spec do
   use ESpec
 
   describe "sanity checks" do
-    example_group "split_into_layers" do
+    example_group "overlay/1" do
+      it do
+        expect(AoC.Day08.overlay([0, 1, 2, 0])) |> to(eq(0))
+        expect(AoC.Day08.overlay([2, 1, 2, 0])) |> to(eq(1))
+        expect(AoC.Day08.overlay([2, 2, 1, 0])) |> to(eq(1))
+        expect(AoC.Day08.overlay([2, 2, 2, 0])) |> to(eq(0))
+      end
+    end
+
+    example_group "split_into_layers/3" do
       it do
         input = "123456789012"
         width = 3

@@ -11,7 +11,21 @@ defmodule AoC.Day08 do
   end
 
   def part_2 do
+    "data/day08-input.txt"
+    |> load_image_data()
+    |> Enum.zip()
+    |> Enum.map(&Tuple.to_list/1)
+    |> Enum.map(&overlay/1)
+
+    # ideally, we'd have some kind of character recognition here
+    # for now, render out the image data, recognize it manually,
+    # then return the text
+    |> render(25, 6)
+
+    "CYKBY"
   end
+
+  def overlay(list), do: Enum.find(list, 2, &(&1 != 2))
 
   def split_into_layers(data, width, height), do: layer_splitter(data, [], width * height)
 
@@ -36,4 +50,22 @@ defmodule AoC.Day08 do
 
   defp reduce_to_pixel_count(pixelmap),
     do: Enum.reduce(pixelmap, %{}, &reduce_single_pixel_value/2)
+
+  defp render(data, width, height) do
+    IO.puts("")
+
+    for y <- 0..(height - 1) do
+      for x <- 0..(width - 1) do
+        pixel =
+          case Enum.at(data, y * width + x) do
+            1 -> "*"
+            _ -> " "
+          end
+
+        IO.write(pixel)
+      end
+
+      IO.puts("")
+    end
+  end
 end
