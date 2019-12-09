@@ -52,20 +52,20 @@ defmodule AoC.Day08 do
     do: Enum.reduce(pixelmap, %{}, &reduce_single_pixel_value/2)
 
   defp render(data, width, height) do
-    IO.puts("")
+    # IO.puts("")
 
     for y <- 0..(height - 1) do
       for x <- 0..(width - 1) do
-        pixel =
+        _pixel =
           case Enum.at(data, y * width + x) do
             1 -> "*"
             _ -> " "
           end
 
-        IO.write(pixel)
+        # IO.write(pixel)
       end
 
-      IO.puts("")
+      # IO.puts("")
     end
   end
 end
