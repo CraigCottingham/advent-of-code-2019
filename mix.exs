@@ -35,6 +35,7 @@ defmodule AoC.MixProject do
       {:espec, "~> 1.7", only: :test},
       {:exprintf, "~> 0.2.1"},
       {:libgraph, "~> 0.13.3"},
+      {:matrax, "~> 0.3.4"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
