@@ -16,19 +16,22 @@ defmodule AoC.Intcode.Memory do
     |> Enum.map(&String.to_integer/1)
   end
 
+  def pad(memory, current_bound, to_address) when current_bound > to_address, do: memory
+
+  def pad(memory, current_bound, to_address),
+    do: List.flatten([memory | List.duplicate(0, to_address - current_bound + 1)])
+
   def read(memory, address) do
     if address >= Enum.count(memory) do
-      raise "memory read out of bounds (address = #{address}): #{inspect(memory)}"
+      0
     else
       Enum.at(memory, address)
     end
   end
 
   def write(memory, address, value) do
-    if address >= Enum.count(memory) do
-      raise "memory write out of bounds (address = #{address}): #{inspect(memory)}"
-    else
-      List.replace_at(memory, address, value)
-    end
+    memory
+    |> pad(Enum.count(memory), address)
+    |> List.replace_at(address, value)
   end
 end
