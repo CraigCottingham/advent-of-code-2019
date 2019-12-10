@@ -128,4 +128,7 @@ defmodule AllSolutions.Spec do
         |> to(eq(shared.solutions |> Map.fetch!("day_09") |> List.last()))
     )
   end
+
+  example_group "day 10" do
+  end
 end
