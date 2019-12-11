@@ -55,27 +55,184 @@ defmodule AoC.Intcode.PaintingRobot do
     run(%{new_state | pending_color: nil, pending_direction: nil})
   end
 
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :up} = state, {0, 0}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :left, position: update_position(position, :left)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :up} = state, {1, 0}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :left, position: update_position(position, :left)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :left} = state, {0, 0}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :down, position: update_position(position, :down)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :left} = state, {1, 0}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :down, position: update_position(position, :down)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :down} = state, {0, 0}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :right, position: update_position(position, :right)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :down} = state, {1, 0}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :right, position: update_position(position, :right)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :right} = state, {0, 0}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :up, position: update_position(position, :up)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :right} = state, {1, 0}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :up, position: update_position(position, :up)}
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :up} = state,
+         {0, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :left,
+           position: update_position(position, :left)
+       }
 
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :up} = state, {0, 1}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :right, position: update_position(position, :right)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :up} = state, {1, 1}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :right, position: update_position(position, :right)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :left} = state, {0, 1}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :up, position: update_position(position, :up)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :left} = state, {1, 1}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :up, position: update_position(position, :up)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :down} = state, {0, 1}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :left, position: update_position(position, :left)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :down} = state, {1, 1}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :left, position: update_position(position, :left)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :right} = state, {0, 1}), do: %{state | known_panels: Map.put(panels, position, :black), heading: :down, position: update_position(position, :down)}
-  defp execute_instructions(%{known_panels: panels, position: position, heading: :right} = state, {1, 1}), do: %{state | known_panels: Map.put(panels, position, :white), heading: :down, position: update_position(position, :down)}
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :up} = state,
+         {1, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :left,
+           position: update_position(position, :left)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :left} = state,
+         {0, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :down,
+           position: update_position(position, :down)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :left} = state,
+         {1, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :down,
+           position: update_position(position, :down)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :down} = state,
+         {0, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :right,
+           position: update_position(position, :right)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :down} = state,
+         {1, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :right,
+           position: update_position(position, :right)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :right} = state,
+         {0, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :up,
+           position: update_position(position, :up)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :right} = state,
+         {1, 0}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :up,
+           position: update_position(position, :up)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :up} = state,
+         {0, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :right,
+           position: update_position(position, :right)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :up} = state,
+         {1, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :right,
+           position: update_position(position, :right)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :left} = state,
+         {0, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :up,
+           position: update_position(position, :up)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :left} = state,
+         {1, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :up,
+           position: update_position(position, :up)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :down} = state,
+         {0, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :left,
+           position: update_position(position, :left)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :down} = state,
+         {1, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :left,
+           position: update_position(position, :left)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :right} = state,
+         {0, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :black),
+           heading: :down,
+           position: update_position(position, :down)
+       }
+
+  defp execute_instructions(
+         %{known_panels: panels, position: position, heading: :right} = state,
+         {1, 1}
+       ),
+       do: %{
+         state
+         | known_panels: Map.put(panels, position, :white),
+           heading: :down,
+           position: update_position(position, :down)
+       }
 
   defp read_camera(%{position: position, known_panels: panels, cpu: cpu} = state) do
     color = Map.get(panels, position, state.default_color)
-    IO.puts("ROBOT: color at #{inspect position} is #{color}")
     send(cpu.pid, color)
     state
   end

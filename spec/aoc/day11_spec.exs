@@ -3,7 +3,7 @@ defmodule AoC.Day11.Spec do
 
   use ESpec
 
-  alias AoC.Intcode.{Interpreter, PaintingRobot}
+  alias AoC.Intcode.Interpreter
 
   describe "sanity checks" do
     it "runs a simple program" do
@@ -14,6 +14,7 @@ defmodule AoC.Day11.Spec do
         Task.async(Interpreter, :initialize, [
           %{state: :running, memory: [3, 7, 104, 1, 104, 0, 99, 0], output_fn: output_fn}
         ])
+
       send(vm.pid, 0)
 
       {:halt, %{state: :stopped}} = Task.await(vm)
@@ -29,28 +30,8 @@ defmodule AoC.Day11.Spec do
     end
 
     it "runs a simple painting robot" do
-      cpu =
-        Task.async(Interpreter, :initialize, [
-          %{memory: [3, 7, 104, 1, 104, 0, 99, 0]}
-        ])
-
-      robot =
-        Task.async(PaintingRobot, :initialize, [
-          %{cpu: cpu}
-        ])
-
-      cpu_output_fn = fn value ->
-        IO.puts("CPU:   sending #{value} to robot")
-        send(robot.pid, value)
-      end
-      Interpreter.set_output_fn(cpu, cpu_output_fn)
-
-      send(cpu.pid, :start)
-      send(robot.pid, :start)
-
-      {:halt, %{state: :stopped}} = Task.await(cpu)
-      send(robot.pid, :term)
-      {:halt, %{state: :term, known_panels: panels, position: position, heading: heading}} = Task.await(robot)
+      memory = [3, 7, 104, 1, 104, 0, 99, 0]
+      %{known_panels: panels, position: position, heading: heading} = AoC.Day11.paint(memory)
 
       expect(Map.keys(panels)) |> to(eq([{0, 0}]))
       expect(Map.get(panels, {0, 0})) |> to(eq(:white))
