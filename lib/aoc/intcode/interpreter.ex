@@ -7,10 +7,6 @@ defmodule AoC.Intcode.Interpreter do
 
   alias AoC.Intcode.Memory
 
-  # def start_link(initial_state) do
-  #   Task.start_link(__MODULE__, :initialize, [initial_state])
-  # end
-
   def initialize(initial_state) do
     %{
       state: :ready,

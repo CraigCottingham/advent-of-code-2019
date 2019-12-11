@@ -29,19 +29,33 @@ defmodule AoC.Day11.Spec do
     end
 
     it "runs a simple painting robot" do
-      {:ok, turtle} = PaintingRobot.initialize(%{memory: [3, 7, 104, 1, 104, 0, 99, 0]})
-      turtle = PaintingRobot.write_camera(turtle, :black)
-      {:ok, instructions, turtle} = wait_for_instructions(PaintingRobot.read_instructions(turtle))
-      turtle = PaintingRobot.execute_instructions(turtle, instructions)
-      turtle = PaintingRobot.stop(turtle)
-      expect(instructions) |> to(eq([1, 0]))
-      expect(Map.keys(turtle.known_panels)) |> to(eq([{0, 0}]))
-      expect(Map.get(turtle.known_panels, {0, 0})) |> to(eq(:white))
-      expect(turtle.position) |> to(eq({-1, 0}))
-      expect(turtle.heading) |> to(eq(:left))
+      cpu =
+        Task.async(Interpreter, :initialize, [
+          %{memory: [3, 7, 104, 1, 104, 0, 99, 0]}
+        ])
+
+      robot =
+        Task.async(PaintingRobot, :initialize, [
+          %{cpu: cpu}
+        ])
+
+      cpu_output_fn = fn value ->
+        IO.puts("CPU:   sending #{value} to robot")
+        send(robot.pid, value)
+      end
+      Interpreter.set_output_fn(cpu, cpu_output_fn)
+
+      send(cpu.pid, :start)
+      send(robot.pid, :start)
+
+      {:halt, %{state: :stopped}} = Task.await(cpu)
+      send(robot.pid, :term)
+      {:halt, %{state: :term, known_panels: panels, position: position, heading: heading}} = Task.await(robot)
+
+      expect(Map.keys(panels)) |> to(eq([{0, 0}]))
+      expect(Map.get(panels, {0, 0})) |> to(eq(:white))
+      expect(position) |> to(eq({-1, 0}))
+      expect(heading) |> to(eq(:left))
     end
   end
-
-  defp wait_for_instructions({:blocked, turtle}), do: wait_for_instructions(PaintingRobot.read_instructions(turtle))
-  defp wait_for_instructions(success), do: success
 end
