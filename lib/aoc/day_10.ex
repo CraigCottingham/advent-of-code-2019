@@ -20,13 +20,22 @@ defmodule AoC.Day10 do
   def angle({a_row, a_col}, {b_row, b_col}) when a_row < b_row and a_col == b_col,
     do: Math.pi() * 3 / 2
 
-  def angle({a_row, a_col}, {b_row, b_col}) when a_row >= b_row and a_col < b_col,
+  def angle({a_row, a_col}, {b_row, b_col}) when a_row < b_row and a_col > b_col,
+    do: Math.atan((a_row - b_row) / (b_col - a_col)) + Math.pi()
+
+  def angle({a_row, a_col}, {b_row, b_col}) when a_row == b_row and a_col < b_col,
+    do: Math.atan((a_row - b_row) / (b_col - a_col))
+
+  def angle({a_row, a_col}, {b_row, b_col}) when a_row == b_row and a_col > b_col,
+    do: Math.atan((a_row - b_row) / (b_col - a_col)) + Math.pi()
+
+  def angle({a_row, a_col}, {b_row, b_col}) when a_row > b_row and a_col < b_col,
     do: Math.atan((a_row - b_row) / (b_col - a_col))
 
   def angle({a_row, a_col}, {b_row, b_col}) when a_row > b_row and a_col == b_col,
     do: Math.pi() / 2
 
-  def angle({a_row, a_col}, {b_row, b_col}),
+  def angle({a_row, a_col}, {b_row, b_col}) when a_row > b_row and a_col > b_col,
     do: Math.atan((a_row - b_row) / (b_col - a_col)) + Math.pi()
 
   def detected_count(a, bs) do
