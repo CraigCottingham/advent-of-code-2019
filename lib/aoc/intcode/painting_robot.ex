@@ -12,7 +12,8 @@ defmodule AoC.Intcode.PaintingRobot do
       known_panels: %{},
       default_color: :black,
       pending_color: nil,
-      pending_direction: nil
+      pending_direction: nil,
+      trace: false
     }
     |> Map.merge(initial_state)
     |> run()
@@ -61,9 +62,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :left,
-           position: update_position(position, :left)
+           position: update_position(position, :left, state.trace)
        }
 
   defp execute_instructions(
@@ -72,9 +73,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :left,
-           position: update_position(position, :left)
+           position: update_position(position, :left, state.trace)
        }
 
   defp execute_instructions(
@@ -83,9 +84,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :down,
-           position: update_position(position, :down)
+           position: update_position(position, :down, state.trace)
        }
 
   defp execute_instructions(
@@ -94,9 +95,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :down,
-           position: update_position(position, :down)
+           position: update_position(position, :down, state.trace)
        }
 
   defp execute_instructions(
@@ -105,9 +106,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :right,
-           position: update_position(position, :right)
+           position: update_position(position, :right, state.trace)
        }
 
   defp execute_instructions(
@@ -116,9 +117,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :right,
-           position: update_position(position, :right)
+           position: update_position(position, :right, state.trace)
        }
 
   defp execute_instructions(
@@ -127,9 +128,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :up,
-           position: update_position(position, :up)
+           position: update_position(position, :up, state.trace)
        }
 
   defp execute_instructions(
@@ -138,9 +139,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :up,
-           position: update_position(position, :up)
+           position: update_position(position, :up, state.trace)
        }
 
   defp execute_instructions(
@@ -149,9 +150,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :right,
-           position: update_position(position, :right)
+           position: update_position(position, :right, state.trace)
        }
 
   defp execute_instructions(
@@ -160,9 +161,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :right,
-           position: update_position(position, :right)
+           position: update_position(position, :right, state.trace)
        }
 
   defp execute_instructions(
@@ -171,9 +172,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :up,
-           position: update_position(position, :up)
+           position: update_position(position, :up, state.trace)
        }
 
   defp execute_instructions(
@@ -182,9 +183,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :up,
-           position: update_position(position, :up)
+           position: update_position(position, :up, state.trace)
        }
 
   defp execute_instructions(
@@ -193,9 +194,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :left,
-           position: update_position(position, :left)
+           position: update_position(position, :left, state.trace)
        }
 
   defp execute_instructions(
@@ -204,9 +205,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :left,
-           position: update_position(position, :left)
+           position: update_position(position, :left, state.trace)
        }
 
   defp execute_instructions(
@@ -215,9 +216,9 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :black),
+         | known_panels: paint_panel(panels, position, :black, state.trace),
            heading: :down,
-           position: update_position(position, :down)
+           position: update_position(position, :down, state.trace)
        }
 
   defp execute_instructions(
@@ -226,19 +227,58 @@ defmodule AoC.Intcode.PaintingRobot do
        ),
        do: %{
          state
-         | known_panels: Map.put(panels, position, :white),
+         | known_panels: paint_panel(panels, position, :white, state.trace),
            heading: :down,
-           position: update_position(position, :down)
+           position: update_position(position, :down, state.trace)
        }
+
+  defp paint_panel(panels, position, color, true) do
+    if Map.has_key?(panels, position) do
+      IO.puts("repainting #{inspect(position)} #{inspect(color)}")
+    else
+      IO.puts("painting   #{inspect(position)} #{inspect(color)}")
+    end
+
+    paint_panel(panels, position, color, false)
+  end
+
+  defp paint_panel(panels, position, color, _), do: Map.put(panels, position, color)
 
   defp read_camera(%{position: position, known_panels: panels, cpu: cpu} = state) do
-    color = Map.get(panels, position, state.default_color)
-    send(cpu.pid, color)
+    color_number =
+      panels
+      |> Map.get(position, state.default_color)
+      |> convert_color_to_number()
+
+    send(cpu.pid, color_number)
     state
   end
 
-  defp update_position({x, y}, :up), do: {x, y - 1}
-  defp update_position({x, y}, :left), do: {x - 1, y}
-  defp update_position({x, y}, :down), do: {x, y + 1}
-  defp update_position({x, y}, :right), do: {x + 1, y}
+  defp convert_color_to_number(:black), do: 0
+  defp convert_color_to_number(:white), do: 1
+
+  defp update_position(position, :up, true) do
+    IO.puts("facing up and moving forward")
+    update_position(position, :up, false)
+  end
+
+  defp update_position(position, :left, true) do
+    IO.puts("facing left and moving forward")
+    update_position(position, :left, false)
+  end
+
+  defp update_position(position, :down, true) do
+    IO.puts("facing down and moving forward")
+    update_position(position, :down, false)
+  end
+
+  defp update_position(position, :right, true) do
+    IO.puts("facing right and moving forward")
+    update_position(position, :right, false)
+  end
+
+  defp update_position({x, y}, :up, _), do: {x, y - 1}
+  defp update_position({x, y}, :left, _), do: {x - 1, y}
+  defp update_position({x, y}, :down, _), do: {x, y + 1}
+  defp update_position({x, y}, :right, _), do: {x + 1, y}
 end

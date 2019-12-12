@@ -1,9 +1,15 @@
 defmodule AoC.Day11 do
   @moduledoc false
 
-  alias AoC.Intcode.{Interpreter, PaintingRobot}
+  alias AoC.Intcode.{Interpreter, Memory, PaintingRobot}
 
   def part_1 do
+    "data/day11-input.txt"
+    |> Memory.load_from_file()
+    |> paint()
+    |> Map.get(:known_panels)
+    |> Map.keys()
+    |> Enum.count()
   end
 
   def part_2 do
