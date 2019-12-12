@@ -7,10 +7,6 @@ defmodule AoC.Intcode.Interpreter do
 
   alias AoC.Intcode.Memory
 
-  # def start_link(initial_state) do
-  #   Task.start_link(__MODULE__, :initialize, [initial_state])
-  # end
-
   def initialize(initial_state) do
     %{
       state: :ready,
@@ -149,6 +145,15 @@ defmodule AoC.Intcode.Interpreter do
         receive do
           :term ->
             {:halt, %{state | state: :term}}
+
+          value when not is_integer(value) ->
+            trace1(
+              "IN",
+              {dest, value, get_mode(mode_1)},
+              state
+            )
+
+            raise "IN read a non-integer"
 
           value ->
             trace1(
