@@ -10,9 +10,21 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dependency-cache-v1-{{ checksum "mix.lock" }}
+            - dependency-cache-v1-
+
       - run: mix local.hex --force
       - run: mix local.rebar --force
       - run: mix deps.get
       - run: mix credo --strict
       - run: mix dialyzer
       - run: mix espec
+
+      - save_cache:
+          key: dependency-cache-v1-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+            - deps
+            - ~/.mix
