@@ -62,6 +62,23 @@ defmodule AoC.Day12.Spec do
 
       expect(AoC.Day12.total_energy(moons)) |> to(eq(1940))
     end
+
+    it "looks for a return to the original state, the short version" do
+      initial_states =
+        [
+          "<x=-1, y=0, z=2>",
+          "<x=2, y=-10, z=-7>",
+          "<x=4, y=-8, z=8>",
+          "<x=3, y=5, z=-1>"
+        ]
+        |> AoC.Day12.parse_input_data()
+        |> Enum.map(&AoC.Day12.initialize_moon/1)
+
+      new_states = AoC.Day12.step(initial_states)
+      new_energy = AoC.Day12.total_energy(new_states)
+
+      expect(AoC.Day12.until_zero_energy(new_states, new_energy, 1)) |> to(eq(2772))
+    end
   end
 
   example_group "apply_gravity_vector/2" do
@@ -89,6 +106,19 @@ defmodule AoC.Day12.Spec do
     it do
       expect(AoC.Day12.apply_velocity({{-1, 0, 2}, {3, -1, -1}}))
       |> to(eq({{2, -1, 1}, {3, -1, -1}}))
+    end
+  end
+
+  example_group "cycle_length/1" do
+    it do
+      initial_states = [
+        {{-1, 0, 2}, {0, 0, 0}},
+        {{2, -10, -7}, {0, 0, 0}},
+        {{4, -8, 8}, {0, 0, 0}},
+        {{3, 5, -1}, {0, 0, 0}}
+      ]
+
+      expect(AoC.Day12.cycle_length(initial_states)) |> to(eq(2772))
     end
   end
 
