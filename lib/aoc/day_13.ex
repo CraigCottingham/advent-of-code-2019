@@ -24,7 +24,7 @@ defmodule AoC.Day13 do
     cpu = Task.async(Interpreter, :initialize, [%{memory: memory}])
     arcade = Task.async(Arcade, :initialize, [%{cpu: cpu, tiles: initial_tiles}])
 
-    cpu_input_fn = fn -> send(cpu.pid, 0) end
+    cpu_input_fn = fn -> send(arcade.pid, :joystick_req) end
     Interpreter.set_input_fn(cpu, cpu_input_fn)
 
     cpu_output_fn = fn value -> send(arcade.pid, value) end
@@ -33,9 +33,9 @@ defmodule AoC.Day13 do
     send(cpu.pid, :start)
     send(arcade.pid, :start)
 
-    {:halt, %{state: :stopped}} = Task.await(cpu)
+    {:halt, %{state: :stopped}} = Task.await(cpu, :infinity)
     send(arcade.pid, :term)
-    {:halt, %{state: :term} = state} = Task.await(arcade)
+    {:halt, %{state: :term} = state} = Task.await(arcade, :infinity)
 
     state
   end
