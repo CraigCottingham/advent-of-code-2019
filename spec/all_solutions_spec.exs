@@ -171,17 +171,17 @@ defmodule AllSolutions.Spec do
     )
   end
 
-  # example_group "day 13" do
-  #   it("part 1",
-  #     do:
-  #       expect(AoC.Day13.part_1())
-  #       |> to(eq(shared.solutions |> Map.fetch!("day_13") |> List.first()))
-  #   )
-  #
+  example_group "day 13" do
+    it("part 1",
+      do:
+        expect(AoC.Day13.part_1())
+        |> to(eq(shared.solutions |> Map.fetch!("day_13") |> List.first()))
+    )
+
   #   it("part 2",
   #     do:
   #       expect(AoC.Day13.part_2())
   #       |> to(eq(shared.solutions |> Map.fetch!("day_13") |> List.last()))
   #   )
-  # end
+  end
 end
