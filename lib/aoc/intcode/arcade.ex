@@ -1,4 +1,4 @@
-defmodule AoC.Intcode.Graphics do
+defmodule AoC.Intcode.Arcade do
   @moduledoc false
 
   use Task
@@ -62,9 +62,18 @@ defmodule AoC.Intcode.Graphics do
     run(%{new_state | pending_x: nil, pending_y: nil, pending_tile: nil})
   end
 
-  defp render_tile(%{tiles: tiles} = state, {x, y, 0}), do: %{state | tiles: Map.put(tiles, {x, y}, :empty)}
-  defp render_tile(%{tiles: tiles} = state, {x, y, 1}), do: %{state | tiles: Map.put(tiles, {x, y}, :wall)}
-  defp render_tile(%{tiles: tiles} = state, {x, y, 2}), do: %{state | tiles: Map.put(tiles, {x, y}, :block)}
-  defp render_tile(%{tiles: tiles} = state, {x, y, 3}), do: %{state | tiles: Map.put(tiles, {x, y}, :paddle)}
-  defp render_tile(%{tiles: tiles} = state, {x, y, 4}), do: %{state | tiles: Map.put(tiles, {x, y}, :ball)}
+  defp render_tile(%{tiles: tiles} = state, {x, y, 0}),
+    do: %{state | tiles: Map.put(tiles, {x, y}, :empty)}
+
+  defp render_tile(%{tiles: tiles} = state, {x, y, 1}),
+    do: %{state | tiles: Map.put(tiles, {x, y}, :wall)}
+
+  defp render_tile(%{tiles: tiles} = state, {x, y, 2}),
+    do: %{state | tiles: Map.put(tiles, {x, y}, :block)}
+
+  defp render_tile(%{tiles: tiles} = state, {x, y, 3}),
+    do: %{state | tiles: Map.put(tiles, {x, y}, :paddle)}
+
+  defp render_tile(%{tiles: tiles} = state, {x, y, 4}),
+    do: %{state | tiles: Map.put(tiles, {x, y}, :ball)}
 end

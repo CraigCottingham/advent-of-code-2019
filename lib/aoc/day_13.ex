@@ -1,7 +1,7 @@
 defmodule AoC.Day13 do
   @moduledoc false
 
-  alias AoC.Intcode.{Interpreter, Memory, Graphics}
+  alias AoC.Intcode.{Arcade, Interpreter, Memory}
 
   def part_1 do
     "data/day13-input.txt"
@@ -13,21 +13,28 @@ defmodule AoC.Day13 do
   end
 
   def part_2 do
+    # "data/day13-input.txt"
+    # |> Memory.load_from_file()
+    # |> Memory.write(0, 2)
+    # |> play()
+    # |> Map.get(:tiles)
+    # |> Enum.filter(fn {_, value} -> value == :block end)
+    # |> Enum.count()
   end
 
   def play(memory, initial_tiles \\ %{}) do
     cpu = Task.async(Interpreter, :initialize, [%{memory: memory}])
-    iga = Task.async(Graphics, :initialize, [%{cpu: cpu, tiles: initial_tiles}])
+    arcade = Task.async(Arcade, :initialize, [%{cpu: cpu, tiles: initial_tiles}])
 
-    cpu_output_fn = fn value -> send(iga.pid, value) end
+    cpu_output_fn = fn value -> send(arcade.pid, value) end
     Interpreter.set_output_fn(cpu, cpu_output_fn)
 
     send(cpu.pid, :start)
-    send(iga.pid, :start)
+    send(arcade.pid, :start)
 
     {:halt, %{state: :stopped}} = Task.await(cpu)
-    send(iga.pid, :term)
-    {:halt, %{state: :term} = state} = Task.await(iga)
+    send(arcade.pid, :term)
+    {:halt, %{state: :term} = state} = Task.await(arcade)
 
     state
   end
