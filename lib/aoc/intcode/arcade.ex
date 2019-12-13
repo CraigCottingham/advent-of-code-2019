@@ -7,6 +7,7 @@ defmodule AoC.Intcode.Arcade do
     %{
       state: :ready,
       cpu: nil,
+      score: -1,
       tiles: %{},
       pending_x: nil,
       pending_y: nil,
@@ -61,6 +62,8 @@ defmodule AoC.Intcode.Arcade do
     new_state = render_tile(state, {x, y, tile})
     run(%{new_state | pending_x: nil, pending_y: nil, pending_tile: nil})
   end
+
+  defp render_tile(state, {-1, _, score}), do: %{state | score: score}
 
   defp render_tile(%{tiles: tiles} = state, {x, y, 0}),
     do: %{state | tiles: Map.put(tiles, {x, y}, :empty)}

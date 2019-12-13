@@ -13,13 +13,11 @@ defmodule AoC.Day13 do
   end
 
   def part_2 do
-    # "data/day13-input.txt"
-    # |> Memory.load_from_file()
-    # |> Memory.write(0, 2)
-    # |> play()
-    # |> Map.get(:tiles)
-    # |> Enum.filter(fn {_, value} -> value == :block end)
-    # |> Enum.count()
+    "data/day13-input.txt"
+    |> Memory.load_from_file()
+    |> Memory.write(0, 2)
+    |> play()
+    |> Map.get(:score)
   end
 
   def play(memory, initial_tiles \\ %{}) do
