@@ -13,6 +13,7 @@ defmodule AoC.Intcode.Interpreter do
       memory: [],
       ip: 0,
       rp: 0,
+      input_fn: fn -> nil end,
       output_fn: nil,
       trace: false,
       trace_prefix: "",
@@ -24,6 +25,11 @@ defmodule AoC.Intcode.Interpreter do
 
   def start(task) do
     send(task.pid, :start)
+    task
+  end
+
+  def set_input_fn(task, input_fn) do
+    send(task.pid, {:set_input_fn, input_fn})
     task
   end
 
@@ -39,6 +45,9 @@ defmodule AoC.Intcode.Interpreter do
 
       :term ->
         {:halt, %{state | state: :term}}
+
+      {:set_input_fn, fun} ->
+        run(%{state | input_fn: fun})
 
       {:set_output_fn, fun} ->
         run(%{state | output_fn: fun})
@@ -136,11 +145,12 @@ defmodule AoC.Intcode.Interpreter do
   # input
   defp execute(
          %{"instruction" => "03", "mode_1" => mode_1},
-         %{memory: memory, ip: ip} = state
+         %{memory: memory, ip: ip, input_fn: input_fn} = state
        ) do
     case get_mode(mode_1) do
       :position ->
         dest = Memory.read(memory, ip + 1)
+        input_fn.()
 
         receive do
           :term ->
@@ -170,6 +180,7 @@ defmodule AoC.Intcode.Interpreter do
 
       :relative ->
         dest = Memory.read(memory, ip + 1) + state.rp
+        input_fn.()
 
         receive do
           :term ->
@@ -188,11 +199,14 @@ defmodule AoC.Intcode.Interpreter do
   end
 
   # output
-  defp execute(%{"instruction" => "04", "mode_1" => mode}, %{memory: memory, ip: ip} = state) do
+  defp execute(
+         %{"instruction" => "04", "mode_1" => mode},
+         %{memory: memory, ip: ip, output_fn: output_fn} = state
+       ) do
     param = Memory.read(memory, ip + 1)
 
     value = get_value(state, param, get_mode(mode))
-    state.output_fn.(value)
+    output_fn.(value)
 
     trace1(
       "OUT",
