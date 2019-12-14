@@ -3,6 +3,10 @@ defmodule AoC.Intcode.Arcade do
 
   use Task
 
+  alias IO.ANSI
+
+  @tick_interval div(1_000, 15)
+
   def initialize(initial_state \\ %{}) do
     %{
       state: :ready,
@@ -15,6 +19,7 @@ defmodule AoC.Intcode.Arcade do
       pending_x: nil,
       pending_y: nil,
       pending_tile: nil,
+      timer: nil,
       trace: false
     }
     |> Map.merge(initial_state)
@@ -24,10 +29,16 @@ defmodule AoC.Intcode.Arcade do
   defp run(%{state: :ready} = state) do
     receive do
       :term ->
+        if state.render_screen, do: ANSI.clear() |> IO.write()
         {:halt, %{state | state: :term}}
 
       :start ->
-        run(%{state | state: :running})
+        if state.render_screen, do: ANSI.clear() |> IO.write()
+
+        state
+        |> schedule_next_tick()
+        |> Map.put(:state, :running)
+        |> run()
 
       :joystick_req ->
         send(state.cpu, 0)
@@ -38,7 +49,14 @@ defmodule AoC.Intcode.Arcade do
   defp run(%{state: :running, pending_x: nil} = state) do
     receive do
       :term ->
+        if state.render_screen, do: ANSI.clear() |> IO.write()
         {:halt, %{state | state: :term}}
+
+      :tick ->
+        state
+        |> render_screen()
+        |> schedule_next_tick()
+        |> run()
 
       :joystick_req ->
         send_joystick_position(state)
@@ -52,7 +70,14 @@ defmodule AoC.Intcode.Arcade do
   defp run(%{state: :running, pending_y: nil} = state) do
     receive do
       :term ->
+        if state.render_screen, do: ANSI.clear() |> IO.write()
         {:halt, %{state | state: :term}}
+
+      :tick ->
+        state
+        |> render_screen()
+        |> schedule_next_tick()
+        |> run()
 
       :joystick_req ->
         send_joystick_position(state)
@@ -66,7 +91,14 @@ defmodule AoC.Intcode.Arcade do
   defp run(%{state: :running, pending_tile: nil} = state) do
     receive do
       :term ->
+        if state.render_screen, do: ANSI.clear() |> IO.write()
         {:halt, %{state | state: :term}}
+
+      :tick ->
+        state
+        |> render_screen()
+        |> schedule_next_tick()
+        |> run()
 
       :joystick_req ->
         send_joystick_position(state)
@@ -78,31 +110,38 @@ defmodule AoC.Intcode.Arcade do
   end
 
   defp run(%{state: :running, pending_x: x, pending_y: y, pending_tile: tile} = state) do
-    new_state =
-      state
-      |> render_tile({x, y, tile})
-      |> render_screen()
-
+    new_state = render_tile(state, {x, y, tile})
     run(%{new_state | pending_x: nil, pending_y: nil, pending_tile: nil})
   end
 
   defp render_screen(%{render_screen: false} = state), do: state
 
-  defp render_screen(
-         %{score: score, ball_position: ball_pos, paddle_position: paddle_pos} = state
-       ) do
-    IO.puts("**********")
-    IO.puts("Score:  #{score}")
-    IO.puts("Ball:   #{inspect(ball_pos)}")
-    IO.puts("Paddle: #{inspect(paddle_pos)}")
-    IO.puts("Blocks: #{count_blocks(state)}")
-    state
-  end
+  defp render_screen(%{tiles: tiles, score: score} = state) do
+    if ANSI.enabled?() do
+      tiles
+      |> Enum.each(fn {{x, y}, tile} ->
+        char =
+          case tile do
+            :empty -> " "
+            :wall -> "W"
+            :block -> "B"
+            :paddle -> "_"
+            :ball -> "o"
+          end
 
-  defp count_blocks(%{tiles: tiles}) do
-    tiles
-    |> Enum.filter(fn {_, value} -> value == :block end)
-    |> Enum.count()
+        ANSI.cursor(y + 5, x + 5) |> IO.write()
+        IO.write(char)
+      end)
+
+      ANSI.home() |> IO.write()
+      IO.write("Score: #{score}")
+
+      Process.sleep(@tick_interval)
+
+      state
+    else
+      %{state | render_screen: false}
+    end
   end
 
   defp render_tile(state, {-1, _, score}), do: %{state | score: score}
@@ -119,8 +158,15 @@ defmodule AoC.Intcode.Arcade do
   defp render_tile(%{tiles: tiles} = state, {x, y, 3}),
     do: %{state | paddle_position: {x, y}, tiles: Map.put(tiles, {x, y}, :paddle)}
 
-  defp render_tile(%{tiles: tiles} = state, {x, y, 4}),
-    do: %{state | ball_position: {x, y}, tiles: Map.put(tiles, {x, y}, :ball)}
+  defp render_tile(%{tiles: tiles} = state, {x, y, 4}) do
+    # send(self(), :tick)
+    %{state | ball_position: {x, y}, tiles: Map.put(tiles, {x, y}, :ball)}
+  end
+
+  defp schedule_next_tick(state) do
+    timer = Process.send_after(self(), :tick, @tick_interval)
+    %{state | timer: timer}
+  end
 
   defp send_joystick_position(%{
          cpu: cpu,
