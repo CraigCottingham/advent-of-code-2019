@@ -22,7 +22,9 @@ defmodule AoC.Day13 do
 
   def play(memory, initial_tiles \\ %{}) do
     cpu = Task.async(Interpreter, :initialize, [%{memory: memory}])
-    arcade = Task.async(Arcade, :initialize, [%{cpu: cpu, tiles: initial_tiles}])
+
+    arcade =
+      Task.async(Arcade, :initialize, [%{cpu: cpu, tiles: initial_tiles, render_screen: false}])
 
     cpu_input_fn = fn -> send(arcade.pid, :joystick_req) end
     Interpreter.set_input_fn(cpu, cpu_input_fn)
