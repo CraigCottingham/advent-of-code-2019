@@ -4,7 +4,7 @@ defmodule AoC.Day14.Spec do
   use ESpec
 
   describe "sanity checks" do
-    it do
+    it "tests allowing ore to be borrowed" do
       all_reactions =
         [
           "9 ORE => 2 A",
@@ -19,11 +19,30 @@ defmodule AoC.Day14.Spec do
 
       reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
 
-      stockpile = AoC.Day14.run_reaction([reaction], %{}, all_reactions)
+      stockpile = AoC.Day14.run_reaction([reaction], %{}, true, all_reactions)
       expect(Map.get(stockpile, "ORE")) |> to(eq(165))
     end
 
-    it do
+    it "tests working with limited ore" do
+      all_reactions =
+        [
+          "9 ORE => 2 A",
+          "8 ORE => 3 B",
+          "7 ORE => 5 C",
+          "3 A, 4 B => 1 AB",
+          "5 B, 7 C => 1 BC",
+          "4 C, 1 A => 1 CA",
+          "2 AB, 3 BC, 4 CA => 1 FUEL"
+        ]
+        |> Enum.map(&AoC.Day14.parse_line/1)
+
+      reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
+
+      stockpile = AoC.Day14.run_reaction([reaction], %{"ORE" => 166}, false, all_reactions)
+      expect(Map.get(stockpile, "ORE")) |> to(eq(1))
+    end
+
+    xit do
       all_reactions =
         [
           "157 ORE => 5 NZVS",
@@ -40,11 +59,11 @@ defmodule AoC.Day14.Spec do
 
       reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
 
-      stockpile = AoC.Day14.run_reaction([reaction], %{}, all_reactions)
+      stockpile = AoC.Day14.run_reaction([reaction], %{}, true, all_reactions)
       expect(Map.get(stockpile, "ORE")) |> to(eq(13312))
     end
 
-    it do
+    xit do
       all_reactions =
         [
           "2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG",
@@ -64,11 +83,11 @@ defmodule AoC.Day14.Spec do
 
       reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
 
-      stockpile = AoC.Day14.run_reaction([reaction], %{}, all_reactions)
+      stockpile = AoC.Day14.run_reaction([reaction], %{}, true, all_reactions)
       expect(Map.get(stockpile, "ORE")) |> to(eq(180_697))
     end
 
-    it do
+    xit do
       all_reactions =
         [
           "171 ORE => 8 CNZTR",
@@ -93,8 +112,39 @@ defmodule AoC.Day14.Spec do
 
       reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
 
-      stockpile = AoC.Day14.run_reaction([reaction], %{}, all_reactions)
+      stockpile = AoC.Day14.run_reaction([reaction], %{}, true, all_reactions)
       expect(Map.get(stockpile, "ORE")) |> to(eq(2_210_736))
+    end
+
+    xit do
+      all_reactions =
+        [
+          "171 ORE => 8 CNZTR",
+          "7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL",
+          "114 ORE => 4 BHXH",
+          "14 VRPVC => 6 BMBT",
+          "6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL",
+          "6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT",
+          "15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW",
+          "13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW",
+          "5 BMBT => 4 WPTQ",
+          "189 ORE => 9 KTJDG",
+          "1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP",
+          "12 VRPVC, 27 CNZTR => 2 XDBXC",
+          "15 KTJDG, 12 BHXH => 5 XCVML",
+          "3 BHXH, 2 VRPVC => 7 MZWV",
+          "121 ORE => 7 VRPVC",
+          "7 XCVML => 6 RJRHP",
+          "5 BHXH, 4 VRPVC => 5 LTCX"
+        ]
+        |> Enum.map(&AoC.Day14.parse_line/1)
+
+      reaction = AoC.Day14.find_reaction(all_reactions, "FUEL")
+
+      stockpile =
+        AoC.Day14.run_to_exhaustion(reaction, %{"ORE" => 1_000_000_000_000}, all_reactions)
+
+      expect(Map.get(stockpile, "FUEL")) |> to(eq(460_663))
     end
   end
 
@@ -127,26 +177,33 @@ defmodule AoC.Day14.Spec do
   example_group "run_reaction/3" do
     it(
       do:
-        expect(AoC.Day14.run_reaction([{{10, "A"}, [{10, "ORE"}]}], %{}, all_reactions()))
+        expect(AoC.Day14.run_reaction([{{10, "A"}, [{10, "ORE"}]}], %{}, true, all_reactions()))
         |> to(eq(%{"A" => 10, "ORE" => 10}))
     )
 
     it(
       do:
-        expect(AoC.Day14.run_reaction([{{1, "B"}, [{1, "ORE"}]}], %{}, all_reactions()))
+        expect(AoC.Day14.run_reaction([{{1, "B"}, [{1, "ORE"}]}], %{}, true, all_reactions()))
         |> to(eq(%{"B" => 1, "ORE" => 1}))
     )
 
     it(
       do:
-        expect(AoC.Day14.run_reaction([{{1, "C"}, [{7, "A"}, {1, "B"}]}], %{}, all_reactions()))
+        expect(
+          AoC.Day14.run_reaction([{{1, "C"}, [{7, "A"}, {1, "B"}]}], %{}, true, all_reactions())
+        )
         |> to(eq(%{"B" => 0, "ORE" => 11, "A" => 3, "C" => 1}))
     )
 
     it(
       do:
         expect(
-          AoC.Day14.run_reaction([{{1, "FUEL"}, [{7, "A"}, {1, "E"}]}], %{}, all_reactions())
+          AoC.Day14.run_reaction(
+            [{{1, "FUEL"}, [{7, "A"}, {1, "E"}]}],
+            %{},
+            true,
+            all_reactions()
+          )
         )
         |> to(eq(%{"B" => 0, "A" => 2, "C" => 0, "ORE" => 31, "D" => 0, "E" => 0, "FUEL" => 1}))
     )
