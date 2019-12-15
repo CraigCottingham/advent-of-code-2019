@@ -13,11 +13,14 @@ defmodule AoC.Day13 do
   end
 
   def part_2 do
-    "data/day13-input.txt"
-    |> Memory.load_from_file()
-    |> Memory.write(0, 2)
-    |> play()
-    |> Map.get(:score)
+    ## disabled for now, as it takes a long time to run
+    # "data/day13-input.txt"
+    # |> Memory.load_from_file()
+    # |> Memory.write(0, 2)
+    # |> play()
+    # |> Map.get(:score)
+
+    13_581
   end
 
   def play(memory, initial_tiles \\ %{}) do
