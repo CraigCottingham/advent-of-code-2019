@@ -4,7 +4,7 @@ defmodule AoC.Day15 do
   alias AoC.Intcode.{Interpreter, Memory, RepairDroid}
 
   def part_1 do
-    %{map: map, position: target_position} =
+    %{map: map, target_position: target_position} =
       "data/day15-input.txt"
       |> Memory.load_from_file()
       |> find_target()
@@ -14,6 +14,22 @@ defmodule AoC.Day15 do
   end
 
   def part_2 do
+    %{map: map, target_position: target_position} =
+      "data/day15-input.txt"
+      |> Memory.load_from_file()
+      |> find_target()
+
+    {_, greatest_path_length} =
+      map
+      |> Graph.vertices()
+      |> List.delete(target_position)
+      |> Enum.map(fn position ->
+        shortest_path = Graph.get_shortest_path(map, target_position, position)
+        {position, Enum.count(shortest_path) - 1}
+      end)
+      |> Enum.max_by(fn {_, path_length} -> path_length end)
+
+    greatest_path_length
   end
 
   def find_target(memory) do

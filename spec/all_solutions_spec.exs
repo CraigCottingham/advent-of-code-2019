@@ -234,5 +234,12 @@ defmodule AllSolutions.Spec do
       expect(AoC.Day15.part_1())
       |> to(eq(shared.solutions |> Map.fetch!("day_15") |> List.first()))
     end
+
+    it "part 2" do
+      # IO.puts("day 15 part 2")
+
+      expect(AoC.Day15.part_2())
+      |> to(eq(shared.solutions |> Map.fetch!("day_15") |> List.last()))
+    end
   end
 end

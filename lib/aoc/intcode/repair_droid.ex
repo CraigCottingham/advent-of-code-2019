@@ -3,12 +3,16 @@ defmodule AoC.Intcode.RepairDroid do
 
   use Task
 
+  alias IO.ANSI
+
   def initialize(initial_state \\ %{}) do
     %{
       state: :ready,
       cpu: nil,
       map: Graph.new(),
       position: {0, 0},
+      target_position: nil,
+      known_locations: %{{0, 0} => 1},
       heading: :north,
       trace: false
     }
@@ -18,12 +22,14 @@ defmodule AoC.Intcode.RepairDroid do
 
   def position_to_string({x, y}), do: "{#{x}, #{y}}"
 
-  defp run(%{state: :ready} = state) do
+  defp run(%{state: :ready, trace: trace} = state) do
     receive do
       :term ->
         {:halt, %{state | state: :term}}
 
       :start ->
+        if trace == :render, do: ANSI.clear() |> IO.write()
+
         state
         |> Map.put(:state, :running)
         |> run()
@@ -46,13 +52,19 @@ defmodule AoC.Intcode.RepairDroid do
         |> run()
 
       {:status, status} ->
-        state
-        |> update_map(status)
-        |> run()
+        %{known_locations: known_locations} = new_state = update_map(state, status)
+
+        if !is_nil(new_state.target_position) &&
+             Enum.all?(Map.values(known_locations), fn value -> !is_nil(value) end) do
+          {:halt, %{new_state | state: :term}}
+        else
+          run(new_state)
+        end
     end
   end
 
-  defp run(%{state: :found} = state) do
+  defp run(%{state: :found, trace: trace} = state) do
+    if trace == :render, do: ANSI.cursor(44, 0) |> IO.write()
     {:halt, %{state | state: :term}}
   end
 
@@ -60,6 +72,11 @@ defmodule AoC.Intcode.RepairDroid do
   defp direction_to_cmd(:south), do: 2
   defp direction_to_cmd(:west), do: 3
   defp direction_to_cmd(:east), do: 4
+
+  defp location_type_to_str(nil), do: "."
+  defp location_type_to_str(0), do: "█"
+  defp location_type_to_str(1), do: " "
+  defp location_type_to_str(2), do: "o"
 
   defp position_in_direction({x, y}, :north), do: {x, y - 1}
   defp position_in_direction({x, y}, :south), do: {x, y + 1}
@@ -88,10 +105,38 @@ defmodule AoC.Intcode.RepairDroid do
     state
   end
 
-  # could not move
-  defp update_map(state, 0) do
+  defp trace(
+         %{known_locations: known_locations, position: {_me_x, _me_y}, trace: :render} = state,
+         _
+       ) do
+    if ANSI.enabled?() do
+      known_locations
+      |> Enum.each(fn {{x, y}, type} ->
+        ANSI.cursor(y + 25, x + 25) |> IO.write()
+
+        type
+        |> location_type_to_str()
+        |> IO.write()
+      end)
+
+      # ANSI.cursor(me_y + 25, me_x + 25) |> IO.write()
+      # IO.write("*")
+    end
+
     state
-    |> trace("could not move #{inspect(state.heading)}")
+  end
+
+  # could not move
+  defp update_map(
+         %{known_locations: known_locations, position: position, heading: heading} = state,
+         0
+       ) do
+    state
+    |> Map.put(
+      :known_locations,
+      Map.put(known_locations, position_in_direction(position, heading), 0)
+    )
+    |> trace("could not move #{inspect(heading)}")
     |> rotate_cw()
   end
 
@@ -100,7 +145,9 @@ defmodule AoC.Intcode.RepairDroid do
     state = update_position(state)
 
     state
+    |> Map.put(:known_locations, Map.put(state.known_locations, state.position, 1))
     |> trace("moved #{inspect(state.heading)} to #{position_to_string(state.position)}")
+    |> update_surroundings()
     |> rotate_ccw()
   end
 
@@ -108,12 +155,13 @@ defmodule AoC.Intcode.RepairDroid do
   defp update_map(state, 2) do
     state = update_position(state)
 
-    trace(
-      state,
-      "moved #{inspect(state.heading)} to #{position_to_string(state.position)}; found target"
-    )
-
-    %{state | state: :found}
+    state
+    |> Map.put(:known_locations, Map.put(state.known_locations, state.position, 2))
+    |> Map.put(:target_position, state.position)
+    |> trace("moved #{inspect(state.heading)} to #{position_to_string(state.position)}")
+    |> trace("found target")
+    |> update_surroundings()
+    |> rotate_ccw()
   end
 
   defp update_position(%{map: map, position: position, heading: heading} = state) do
@@ -130,5 +178,16 @@ defmodule AoC.Intcode.RepairDroid do
     )
 
     %{state | map: updated_map, position: new_position}
+  end
+
+  defp update_surroundings(%{known_locations: known_locations, position: position} = state) do
+    updated_known_locations =
+      known_locations
+      |> Map.put_new(position_in_direction(position, :north), nil)
+      |> Map.put_new(position_in_direction(position, :south), nil)
+      |> Map.put_new(position_in_direction(position, :west), nil)
+      |> Map.put_new(position_in_direction(position, :east), nil)
+
+    %{state | known_locations: updated_known_locations}
   end
 end
