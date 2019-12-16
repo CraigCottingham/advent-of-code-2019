@@ -34,7 +34,6 @@ defmodule AoC.MixProject do
       {:dialyxir, "~> 1.0.0-rc.7", only: [:dev, :test], runtime: false},
       {:espec, "~> 1.7", only: :test},
       {:exprintf, "~> 0.2.1"},
-      {:io_ansi_plus, "~> 0.1.22"},
       {:libgraph, "~> 0.13.3"},
       {:math, git: "git://github.com/CraigCottingham/math.git"},
       {:max, "~> 0.1.3"},
