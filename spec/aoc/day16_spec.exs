@@ -43,6 +43,34 @@ defmodule AoC.Day16.Spec do
     )
   end
 
+  example_group "embedded_message_offset/1" do
+    it do
+      offset =
+        "03036732577212944063491565474664"
+        |> AoC.Day16.split_signal()
+        |> AoC.Day16.embedded_message_offset()
+
+      expect(offset) |> to(eq(303_673))
+    end
+  end
+
+  example_group "extract_embedded_image/1" do
+    it do
+      one_instance = AoC.Day16.split_signal("03036732577212944063491565474664")
+      expect(AoC.Day16.extract_embedded_message(one_instance)) |> to(eq(84_462_026))
+    end
+
+    it do
+      one_instance = AoC.Day16.split_signal("02935109699940807407585447034323")
+      expect(AoC.Day16.extract_embedded_message(one_instance)) |> to(eq(78_725_270))
+    end
+
+    it do
+      one_instance = AoC.Day16.split_signal("03081770884921959731165446850517")
+      expect(AoC.Day16.extract_embedded_message(one_instance)) |> to(eq(53_553_731))
+    end
+  end
+
   example_group "get_dither_pattern/1" do
     it "when offset == 0" do
       pattern = AoC.Day16.get_dither_pattern(0)

@@ -11,6 +11,12 @@ defmodule AoC.Day16 do
   end
 
   def part_2 do
+    "data/day16-input.txt"
+    |> File.stream!()
+    |> Enum.map(&String.trim/1)
+    |> Enum.join("")
+    |> split_signal()
+    |> extract_embedded_message()
   end
 
   def checksum(input, n) do
@@ -36,6 +42,44 @@ defmodule AoC.Day16 do
     |> Enum.reduce(0, fn {a, b}, acc -> acc + a * b end)
     |> abs()
     |> Integer.mod(10)
+  end
+
+  def embedded_message_offset(input) do
+    input
+    |> Enum.take(7)
+    |> Enum.join()
+    |> String.to_integer()
+  end
+
+  def extract_embedded_message(one_instance) do
+    one_length = Enum.count(one_instance)
+    total_length = one_length * 10_000
+    offset = embedded_message_offset(one_instance)
+    count_backwards = total_length - offset
+
+    reversed =
+      one_instance
+      |> Enum.reverse()
+      |> List.duplicate(div(count_backwards, one_length) + 1)
+      |> List.flatten()
+      |> Enum.take(count_backwards)
+
+    processed =
+      Enum.reduce(1..100, reversed, fn _, input ->
+        {output, _} =
+          Enum.map_reduce(input, 0, fn digit, acc ->
+            new_digit = Integer.mod(acc + digit, 10)
+            {new_digit, new_digit}
+          end)
+
+        output
+      end)
+
+    processed
+    |> Enum.reverse()
+    |> Enum.take(8)
+    |> Enum.join()
+    |> String.to_integer()
   end
 
   def get_dither_pattern(n) when n in [0, 1] do
