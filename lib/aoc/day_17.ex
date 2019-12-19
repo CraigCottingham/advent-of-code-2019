@@ -13,6 +13,23 @@ defmodule AoC.Day17 do
   end
 
   def part_2 do
+    programs =
+      String.to_charlist(
+        ## determine this in code, not by eye
+        "A,B,B,C,C,A,A,B,B,C\n" <>
+          "L,12,R,4,R,4\n" <>
+          "R,12,R,4,L,12\n" <>
+          "R,12,R,4,L,6,L,8,L,8\n" <>
+          "n\n"
+      )
+
+    %{dust_amount: dust_amount} =
+      "data/day17-input.txt"
+      |> Memory.load_from_file()
+      |> Memory.write(0, 2)
+      |> AoC.Day17.walk_scaffolding(programs)
+
+    dust_amount
   end
 
   def alignment_parameter({row, col}), do: row * col
@@ -41,8 +58,6 @@ defmodule AoC.Day17 do
     view
     |> flip_diagonal()
     |> extract_horizontal_segments()
-
-    # [{{2, 0}, {4, 0}}, {{0, 2}, {6, 2}}, {{2, 6}, {6, 6}}, {{2, 10}, {6, 10}}, {{2, 12}, {4, 12}}]
     |> Enum.map(fn {{r1, c1}, {r2, c2}} -> {{c1, r1}, {c2, r2}} end)
   end
 
@@ -91,5 +106,25 @@ defmodule AoC.Day17 do
     |> Enum.reject(fn {{p1, _}, {_, p2}} -> p1 == p2 end)
     |> Enum.reject(fn {{_, p1}, {_, p2}} -> p1 == p2 end)
     |> Enum.map(fn {{{row, _}, _}, {{_, col}, _}} -> {row, col} end)
+  end
+
+  def walk_scaffolding(memory, programs) do
+    cpu = Task.async(Interpreter, :initialize, [%{memory: memory}])
+    robot = Task.async(VacuumRobot, :initialize, [%{cpu: cpu, programs: programs}])
+
+    cpu_input_fn = fn -> send(robot.pid, :send_program_char) end
+    Interpreter.set_input_fn(cpu, cpu_input_fn)
+
+    cpu_output_fn = fn value -> send(robot.pid, value) end
+    Interpreter.set_output_fn(cpu, cpu_output_fn)
+
+    send(cpu.pid, :start)
+    send(robot.pid, :start)
+
+    {:halt, _} = Task.await(cpu, :infinity)
+    send(robot.pid, :term)
+    {:halt, state} = Task.await(robot, :infinity)
+
+    state
   end
 end

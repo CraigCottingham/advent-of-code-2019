@@ -9,6 +9,8 @@ defmodule AoC.Intcode.VacuumRobot do
       cpu: nil,
       view: [],
       current_line: [],
+      programs: [],
+      dust_amount: 0,
       trace: false
     }
     |> Map.merge(initial_state)
@@ -24,13 +26,28 @@ defmodule AoC.Intcode.VacuumRobot do
         state
         |> Map.put(:state, :running)
         |> run()
+
+      :send_program_char ->
+        # not a valid program character
+        send(state.cpu.pid, 0)
+        run(state)
     end
   end
 
-  defp run(%{state: :running, view: view, current_line: line} = state) do
+  defp run(%{state: :running, view: view, current_line: line, programs: programs} = state) do
     receive do
       :term ->
         {:halt, %{state | state: :term}}
+
+      :send_program_char when programs == [] ->
+        # not a valid program character
+        send(state.cpu.pid, 0)
+        run(state)
+
+      :send_program_char ->
+        [c | rest] = programs
+        send(state.cpu.pid, c)
+        run(%{state | programs: rest})
 
       {:pixel, value} ->
         new_state =
@@ -43,6 +60,10 @@ defmodule AoC.Intcode.VacuumRobot do
           end
 
         run(new_state)
+
+      value ->
+        # IO.write <<value::utf8>>
+        run(%{state | dust_amount: value})
     end
   end
 end

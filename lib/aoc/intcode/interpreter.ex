@@ -157,13 +157,7 @@ defmodule AoC.Intcode.Interpreter do
             {:halt, %{state | state: :term}}
 
           value when not is_integer(value) ->
-            trace1(
-              "IN",
-              {dest, value, get_mode(mode_1)},
-              state
-            )
-
-            raise "IN read a non-integer"
+            raise "IN read a non-integer: #{inspect(value)}"
 
           value ->
             trace1(
